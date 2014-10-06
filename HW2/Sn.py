@@ -8,6 +8,13 @@ import time as time
 import sys as sys
 import numpy as np
 
+# Function, refer to docstring for purpose
+def cep():
+	''' A wrapper to place file seperators in a log file for the
+	debug level '''
+	logging.debug( "*****************************************************" )
+	return()
+
 print "*****************************************************"
 print "Sn CODE BEGIN!"
 print "Reading input file"
@@ -22,10 +29,15 @@ csvinput = []
 
 # This will create an array of stirngs from the csv file and convert them to
 # floats
+r_index = 0
 for row in reader:
 	csvinput.append( row )
-	for column in len( csvinput[ row ]
-		csvinput[ row ][ column ] = float( csvinput[ row ][ column ] )
+	print str(csvinput[ r_index ] )
+	for column in range( len(csvinput[ r_index ] ) ):
+		if len( csvinput[ r_index ][ column ] ) != 0:
+			csvinput[ r_index ][ column ] = float( 
+				csvinput[ r_index ][ column ] )
+	r_index += 1
 
 LogFileName = 'logfile.dat'
 
@@ -46,12 +58,12 @@ DimRow = 10
 
 # This exits if no log level was set or set improperly
 try:
-	LogLevel = int( csvinput[ 0 ][ 0 ]
+	LogLevel = int( csvinput[ 0 ][ 0 ] )
 except:
 	sys.exit( "ERROR!!: Log level can not be cast as an integer" )
 
 #This does some basic config on the log file
-logging.basicConfig( filename = LogFileName , format ="[%(levelname)8s] %(message)s" \
+logging.basicConfig( filename = LogFileName , format = "[%(levelname)8s] %(message)s" \
     , filemode = 'w' , level = LogLevel )
 logging.debug( "This is the debug level reporting in" )
 logging.info( "This is the info level reporting in " )
@@ -87,7 +99,7 @@ W16 = [0.027152459411754,0.062253523938648,0.095158511682493,
 
 # From the input file we know which Sn method we desire
 # We use this input parameter 
-Q_set = csvinput[ Qrow ][ 0 ]
+Q_set = csvinput[ QRow ][ 0 ]
 
 if Q_set == 2:
 	mu_array = Mu2
@@ -102,8 +114,15 @@ elif Q_set == 16:
 	mu_array = Mu16
 	w_array = W16
 else:
-	sys.exit("ERROR!!: Qudrature, row" + str(Q_set) + " , not set or
-	invalid")
+	sys.exit( "ERROR!!: Qudrature, row" + str( Q_set ) + " , not set or \
+	invalid" )
+cep()
+logging.debug( "The quadrature set chosen is Sn " +str( Q_set ) )
+logging.debug( "The selected mu array is" )
+logging.debug( str( mu_array ) )
+logging.debug( "The corresponding weights array is " )
+logging.debug( str( w_array ) )
+cep()
 
 print "Sn CODE END!!"
 print "*************************************************************"
