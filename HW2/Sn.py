@@ -85,5 +85,25 @@ W16 = [0.027152459411754,0.062253523938648,0.095158511682493,
 	,0.124628971255534,0.095158511682493,0.062253523938648
 	,0.027152459411754]
 
+# From the input file we know which Sn method we desire
+# We use this input parameter 
+Q_set = csvinput[ Qrow ][ 0 ]
+
+if Q_set == 2:
+	mu_array = Mu2
+	w_array = W2
+elif Q_set == 4:
+	mu_array = Mu4
+	w_array = W4
+elif Q_set == 8:
+	mu_array = Mu8
+	w_array = W8
+elif Q_set == 16:
+	mu_array = Mu16
+	w_array = W16
+else:
+	sys.exit("ERROR!!: Qudrature, row" + str(Q_set) + " , not set or
+	invalid")
+
 print "Sn CODE END!!"
 print "*************************************************************"
