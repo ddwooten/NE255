@@ -21,7 +21,7 @@ print "Reading input file"
 
 # This is the csv file from which we will read in cross sx,
 # etc and other code options. In place of user input
-csvfile = open( 'input3.csv' , 'r' )
+csvfile = open( 'input5.csv' , 'r' )
 reader = csvreader.reader( csvfile )
 
 # Initilizing the array to hold the inputs
@@ -205,7 +205,7 @@ def Part_Cur( J , N , w , mu , psi , cep ):
 	return( part_cur )
 
 #This function will compute our absorption rates in each slab half
-def Abs_Slab( J , phi , St , cep ):
+def Abs_Slab( J , phi , St , h , cep ):
 	'''This function calculates the absorption rate in each
 		half of the cell'''
 	cep()
@@ -215,6 +215,7 @@ def Abs_Slab( J , phi , St , cep ):
 	for j in range ( half_slab ):
 		abs_rate[ 0 , 0 ] = abs_rate[ 0 , 0 ] + phi[ j ] * St[ j ]
 		abs_rate[ 0 , 1 ] = abs_rate[ 0 , 1 ] + phi[ J - 1 - j ] * St[ J - 1 - j ]
+	abs_rate = abs_rate / float( half_slab )
 	logging.debug( "Exiting the Abs_Slab routine" )
 	return( abs_rate )
 
@@ -376,7 +377,7 @@ logging.debug( "Calling the Abs_Slab routine" )
 
 # Here we call a function to calculate the absorption rate in each half
 # of the slab
-abs_array = Abs_Slab( num_Cell , phi_array , SigT , cep )
+abs_array = Abs_Slab( num_Cell , phi_array , SigT , h_Value , cep )
 
 #Here we print out the absorption rates so we can know them
 print "The absorption rates"
