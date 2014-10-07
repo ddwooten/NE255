@@ -198,8 +198,8 @@ def Part_Cur( J , N , w , mu , psi , cep ):
 	part_cur = np.zeros( ( 1 , 2 ) )
 	n_part = int( N / 2.0 )
 	for n in range( n_part ):
-		part_cur[ 1 , 1 ] = part_cur[ 1 , 1 ] + w[ n ] * mu[ n ] * psi[ n , 0 ]
-		part_cur[ 1 , 2 ] = part_cur[ 1 , 2 ] + w[ N - 1 - n ] * mu[ N - 1 - n ] * \
+		part_cur[ 0 , 1 ] = part_cur[ 0 , 1 ] + w[ n ] * mu[ n ] * psi[ n , 0 ]
+		part_cur[ 0 , 2 ] = part_cur[ 0 , 2 ] + w[ N - 1 - n ] * mu[ N - 1 - n ] * \
 			psi[ N * J + N - 1 - n , 0 ]
 	logging.debug( "Exiting the Part_Cur routine" )
 	return( part_cur )
@@ -213,8 +213,8 @@ def Abs_Slab( J , phi , St , cep ):
 	half_slab = int( J / 2 )
 	abs_rate = np.zeros( ( 1 , 2 ) )
 	for j in range ( half_slab ):
-		abs_rate[ 1 , 1 ] = abs_rate[ 1 , 1 ] + phi[ j ] * St[ j ]
-		abs_rate[ 1 , 2 ] = abs_rate[ 1 , 2 ] + phi[ J - j ] * St[ J - j ]
+		abs_rate[ 0 , 1 ] = abs_rate[ 0 , 1 ] + phi[ j ] * St[ j ]
+		abs_rate[ 0 , 2 ] = abs_rate[ 0 , 2 ] + phi[ J - j ] * St[ J - j ]
 	logging.debug( "Exiting the Abs_Slab routine" )
 	return( abs_rate )
 
@@ -281,9 +281,10 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 				" edge ) and the " + str( N * j + n ) + " column ( " \
 				+ str( n ) + " direction ) have value " \
 				+ str( mat[ N * j + n , N * j + n ] ) )
-# If we are not at the last cell, calculate the coefficient for the 
-# J + 1/2 edge
-			if j + 1 < J:
+# This if statement is no longer used. Rather than potentially
+# compromize the code, it has been modified to always be true.
+# In this way, we properlly fill out our matrix
+			if j - 1 < J:
 				mat[ N * j + n, N * ( j + 1 ) + n ] = ( mu[ n ] / h ) + \
 					 ( St[ j ] / 2.0 )
 				logging.debug( "The " + str( N * j + n ) + " row ( " + str( j + 1 ) + \
@@ -372,8 +373,9 @@ logging.debug( "Calling the Part_Cur routine" )
 part_cur_array = Part_Cur( num_Cell , num_Quad , w_array , mu_array, psi_array , cep )
 
 #Here we print out the partial currents array so we can know their value
-print str( part_cur_array[ 1 , 1 ] ) + " : left"
-print str( part_cur_array[ 1 , 2 ] ) + " : right"
+print "The partial currents: "
+print str( part_cur_array[ 0 , 1 ] ) + " : left"
+print str( part_cur_array[ 0 , 2 ] ) + " : right"
 
 cep()
 logging.debug( "Calling the Abs_Slab routine" )
@@ -383,8 +385,9 @@ logging.debug( "Calling the Abs_Slab routine" )
 abs_array = Abs_Slab( num_Cell , phi_array , SigT , cep )
 
 #Here we print out the absorption rates so we can know them
-print str( abs_array[ 1 , 1 ] ) + " : left"
-print str( abs_array[ 1 , 2 ] ) + " : right"
+print "The absorption rates"
+print str( abs_array[ 0 , 1 ] ) + " : left"
+print str( abs_array[ 0 , 2 ] ) + " : right"
 
 cep()
 logging.debug( "The rhs_column has form" )
