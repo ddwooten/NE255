@@ -190,10 +190,11 @@ def RHS_Column( J, N, source, BCL, BCR, cep ):
 	return(rhs)
 
 # This function will compute our cell averaged fluxes
-def Gen_Phi( J , N , w , psi ):
+def Gen_Phi( J , N , w , psi, cep ):
 	''' This function properly weights and averages
 		an array of edge psi values to get at
 		the cell averaged fluxes '''
+	cep()
 	logging.debug( "Begining the Gen_Phi routine" )
 	phi = np.zeros( ( J , 1 ) )
 	i = 0
@@ -201,11 +202,29 @@ def Gen_Phi( J , N , w , psi ):
 # and average ( accorrding to diamond difference ) for phi
 	for j in range( 0 , J , 2 ):
 		for n in range( N ):
-			phi[ i ] = phi[ i ] + ( w[ n ] * psi[ N * j + n ] + \
-				w[ n ] * psi[ N * ( j + 1 ) + n ] ) / 2.0
+			phi[ i , 0 ] = phi[ i , 0 ] + ( w[ n ] * psi[ N * j + n , 0 ] + \
+				w[ n ] * psi[ N * ( j + 1 ) + n , 0 ] ) / 2.0
 		i = i + 1
+	logging.debug( "Exiting the Gen_Phi routine" )
 	return(phi)
-		
+
+# This function will compute our cell averaged currents
+def Gen_Cur( J , N , mu , w , psi, cep ):
+	''' This function, taking an array of psis,
+		will produce the corresponding and
+		weighted currents '''
+	cep()
+	logging.debug( "Begining the Gen_Cur routine" )
+	cur = np.zeros( ( J , 1 ) )
+	i = 0
+	for j in range( 0 , J , 2 ):
+		for n in range( N ):
+			cur[ i , 0 ] = cur[ i , 0 ] + w[ n ] * mu[ n ] * ( psi[ N * j + n , 0 ] + \
+				psi[ N * ( j + 1 ) + n , 0 ] ) / 2.0
+		i = i + 1
+	logging.debug( "Exiting the Gen_Cur routine" )
+	return(cur)
+				
 # This function, taking in various problem parameters as arrays,
 # Will construct the coefficient matrix that we will need
 # to invert to solve a given problem.
@@ -272,7 +291,6 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 		the " + str( n ) + " direction has value 1" )
 	logging.debug( "End apply boundary conditions" )
 	logging.debug( "Exiting the Build_Matrix routine" )
-	cep()
 	return( mat )
 
 cep()
@@ -284,10 +302,22 @@ coeff_matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , Bc
 
 cep()
 logging.debug( "Calling the RHS_Column routine" )
-cep()
 
+# Here we build the rhs solution vector for our matrix problem
 rhs_column = RHS_Column( num_Cell , num_Quad , src , BconL , BconR , cep )
 
+cep()
+logging.debug( "Calling the Gen_Phi routine" )
+
+# Here we call a function to generate our cell averaged scalar fluxes
+phi_array = Gen_Phi( num_Cell , num_Quad , w_array , psi_array , cep )
+
+cep()
+logging.debug( "Calling the Gen_Cur routine" )
+
+# Here we call a function to generate our cell averaged currents
+cur_array = Gen_Cur( num_Cell , num_Quad , mu_array , w_array , psi_array , cep )
+ 
 cep()
 logging.debug( "The rhs_column has form" )
 cep()
@@ -295,6 +325,19 @@ if LogLevel <= 10:
 	for row in rhs_column:
 		logging.debug( str( rhs_column[ row ] ) )
 
+cep()
+logging.debug( "The phi vector has form" )
+cep()
+if LogLevel <= 10:
+	for row in phi_array:
+		logging.debug( str( phi_array[ row ] ) )
+
+cep()
+logging.debug( "The cur vector has form" )
+cep()
+if LogLevel <= 10:
+	for row in cur_array:
+		logging.debug( str( cur_array[ row ] ) )
 # Here we print out the matrix to file in a nicely formatted fashion as
 # this helps with debugging
 cep()
