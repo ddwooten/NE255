@@ -14,7 +14,7 @@ def cep():
 	debug level '''
 	logging.debug( "*****************************************************" )
 	return()
-
+# Let the user know that the code is running
 print "*****************************************************"
 print "Sn CODE BEGIN!"
 print "Reading input file"
@@ -37,7 +37,7 @@ for row in reader:
 			csvinput[ r_index ][ column ] = float( 
 				csvinput[ r_index ][ column ] )
 	r_index += 1
-
+# File names for the log and output files respectively
 LogFileName = 'logfile.dat'
 
 OutputFile = 'output.dat'
@@ -61,7 +61,7 @@ try:
 except:
 	sys.exit( "ERROR!!: Log level can not be cast as an integer" )
 
-#This does some basic config on the log file
+# This does some basic config on the log file
 logging.basicConfig( filename = LogFileName , format = "[%(levelname)8s] %(message)s" \
     , filemode = 'w' , level = LogLevel )
 logging.debug( "This is the debug level reporting in" )
@@ -71,6 +71,7 @@ logging.error( "This is the error level reporting in" )
 logging.critical( "This is the critical level reporting in" )
 
 #Here we define some quadrature arrays
+# Both the angular values and the weights
 Mu2 = [-0.577350269189626,0.577350269189626]
 W2 = [1,1]
 Mu4 = [-0.861136311594053,-0.339981043584856,0.339981043584856,
@@ -97,7 +98,8 @@ W16 = [0.027152459411754,0.062253523938648,0.095158511682493,
 	,0.027152459411754]
 
 # From the input file we know which Sn method we desire
-# We use this input parameter 
+# We use this input parameter and the following if
+# statements to set our quadrature
 Q_set = csvinput[ QRow ][ 0 ]
 
 if Q_set == 2:
@@ -115,6 +117,8 @@ elif Q_set == 16:
 else:
 	sys.exit( "ERROR!!: Qudrature, row" + str( QRow ) + " , not set or \
 	invalid" )
+
+# This simply print out helpful info to the log file
 cep()
 logging.debug( "The quadrature set chosen is Sn " +str( Q_set ) )
 logging.debug( "The selected mu array is" )
@@ -124,6 +128,7 @@ logging.debug( str( w_array ) )
 cep()
 
 # Here we define some short hand for various arrays we will need
+# as well as print out their values to the log file
 src = csvinput[ SrcRow ]
 cep()
 logging.debug( "The source array is given as " )
@@ -158,6 +163,13 @@ num_Quad = int( csvinput[ QRow ][ 0 ] )
 cep()
 logging.debug( "The number of quadrature is given as " + str( num_Quad ) )
 
+# This function, taking in various problem parameters as arrays,
+# Will construct the coefficient matrix that we will need
+# to invert to solve a given problem.
+# This method will work for both purely absorbing, isotropic
+# scattering, or linearly anisotropic scatering problems
+# All that needs to be done is the proper cross sections
+# set
 
 def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 	''' This function builds our coefficients matrix to solve
@@ -165,15 +177,21 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 	cep()
 	logging.debug( "Begining the Build_Matrix routine" )
 	mat = np.zeros( ( ( J + 1 ) * N , ( J + 1 ) * N ) )
+# Loop through the spatial cells
 	for j in range( J ):
 		cep()
 		logging.debug( " Working on the " + str( j ) + " cell" )
+# Loop through the quadrature
 		for n in range( N ):
+# Calculate the coefficient from the derivative term
+# as well as the total cross section term
 			mat[ ( N * j + n ) , ( N * j + n ) ] = ( -mu[ n ] / h )	+ ( St[ j ] / 2.0 )  
 			logging.debug( "The " + str( N * j + n ) + " row ( " + str( j ) + \
 				" edge ) and the " + str( N * j + n ) + " column ( " \
 				+ str( n ) + " direction ) have value " \
 				+ str( mat[ N * j + n , N * j + n ] ) )
+# If we are not at the last cell, calculate the coefficient for the 
+# J + 1/2 edge
 			if j + 1 < J:
 				mat[ N * j + n, N * ( j + 1 ) + n ] = ( mu[ n ] / h ) + \
 					 ( St[ j + 1 ] / 2.0 )
@@ -183,6 +201,7 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 					+ str( mat[ N * j + n , N * ( j + 1 ) + n ] ) )
 			logging.debug( "Populating the scattering terms for the " + str( j ) + \
 				" cell and the " + str( n ) + " direction" )
+# Calculate the coefficients for the right hand side scattering terms
 			for nprime in range( N ):
 				mat[ N * j + n , N * j + nprime ] = mat[ N * j + n , \
 					N * j + nprime ] - ( w[ nprime ] * ( 1.0 / 2.0 ) ) \
@@ -200,6 +219,8 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 	n_boundary = int( N / 2 )
 	for n in range( n_boundary ):
 		cep()
+# Calculate the boundary condition coefficients for each edge
+# startign with the mu that is furthest from 0
 		mat[ N * J + ( 2 * n ) , ( N - n ) ] = 1
 		logging.debug( "The " + str( N * J + ( 1 + 2 * n ) ) + " row ( left BC ) for \
 		the " + str( N - n ) + " direction has value 1" )
@@ -213,8 +234,13 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 
 cep()
 logging.debug( "Calling the Build_Matrix routine" )
-matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , BconL \
+
+# Here we build our coefficient matrix by calling the above function
+coeff_matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , BconL \
 	, BconR , h_Value , mu_array , w_array , cep )
+
+# Here we print out the matrix to file in a nicely formatted fashion as
+# this helps with debugging
 cep()
 logging.debug( "The constructed matrix has form" )
 if LogLevel <= 10:
@@ -224,5 +250,7 @@ if LogLevel <= 10:
 			outstring = outstring + str( matrix[ row , col ] )[0:3] + ' '
 		logging.debug( outstring )
 logging.debug( "End of file" )
+
+# Let the user know it has all ended
 print "Sn CODE END!!"
 print "*************************************************************"
