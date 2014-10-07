@@ -198,8 +198,8 @@ def Part_Cur( J , N , w , mu , psi , cep ):
 	part_cur = np.zeros( ( 1 , 2 ) )
 	n_part = int( N / 2.0 )
 	for n in range( n_part ):
-		part_cur[ 0 , 1 ] = part_cur[ 0 , 1 ] + w[ n ] * mu[ n ] * psi[ n , 0 ]
-		part_cur[ 0 , 2 ] = part_cur[ 0 , 2 ] + w[ N - 1 - n ] * mu[ N - 1 - n ] * \
+		part_cur[ 0 , 0 ] = part_cur[ 0 , 0 ] + w[ n ] * mu[ n ] * psi[ n , 0 ]
+		part_cur[ 0 , 1 ] = part_cur[ 0 , 1 ] + w[ N - 1 - n ] * mu[ N - 1 - n ] * \
 			psi[ N * J + N - 1 - n , 0 ]
 	logging.debug( "Exiting the Part_Cur routine" )
 	return( part_cur )
@@ -213,8 +213,8 @@ def Abs_Slab( J , phi , St , cep ):
 	half_slab = int( J / 2 )
 	abs_rate = np.zeros( ( 1 , 2 ) )
 	for j in range ( half_slab ):
-		abs_rate[ 0 , 1 ] = abs_rate[ 0 , 1 ] + phi[ j ] * St[ j ]
-		abs_rate[ 0 , 2 ] = abs_rate[ 0 , 2 ] + phi[ J - j ] * St[ J - j ]
+		abs_rate[ 0 , 0 ] = abs_rate[ 0 , 0 ] + phi[ j ] * St[ j ]
+		abs_rate[ 0 , 1 ] = abs_rate[ 0 , 1 ] + phi[ J - 1 - j ] * St[ J - 1 - j ]
 	logging.debug( "Exiting the Abs_Slab routine" )
 	return( abs_rate )
 
@@ -226,14 +226,12 @@ def Gen_Phi( J , N , w , psi, cep ):
 	cep()
 	logging.debug( "Begining the Gen_Phi routine" )
 	phi = np.zeros( ( J , 1 ) )
-	i = 0
 # Here we loop through our psi array and appropriately weight
 # and average ( accorrding to diamond difference ) for phi
-	for j in range( 0 , J , 2 ):
+	for j in range( J ):
 		for n in range( N ):
-			phi[ i , 0 ] = phi[ i , 0 ] + ( w[ n ] * psi[ N * j + n , 0 ] + \
+			phi[ j , 0 ] = phi[ j , 0 ] + ( w[ n ] * psi[ N * j + n , 0 ] + \
 				w[ n ] * psi[ N * ( j + 1 ) + n , 0 ] ) / 2.0
-		i = i + 1
 	logging.debug( "Exiting the Gen_Phi routine" )
 	return( phi )
 
@@ -245,12 +243,10 @@ def Gen_Cur( J , N , mu , w , psi, cep ):
 	cep()
 	logging.debug( "Begining the Gen_Cur routine" )
 	cur = np.zeros( ( J , 1 ) )
-	i = 0
-	for j in range( 0 , J , 2 ):
+	for j in range( J ):
 		for n in range( N ):
-			cur[ i , 0 ] = cur[ i , 0 ] + w[ n ] * mu[ n ] * ( psi[ N * j + n , 0 ] + \
+			cur[ j , 0 ] = cur[ j , 0 ] + w[ n ] * mu[ n ] * ( psi[ N * j + n , 0 ] + \
 				psi[ N * ( j + 1 ) + n , 0 ] ) / 2.0
-		i = i + 1
 	logging.debug( "Exiting the Gen_Cur routine" )
 	return( cur )
 				
@@ -374,8 +370,8 @@ part_cur_array = Part_Cur( num_Cell , num_Quad , w_array , mu_array, psi_array ,
 
 #Here we print out the partial currents array so we can know their value
 print "The partial currents: "
-print str( part_cur_array[ 0 , 1 ] ) + " : left"
-print str( part_cur_array[ 0 , 2 ] ) + " : right"
+print str( part_cur_array[ 0 , 0 ] ) + " : left"
+print str( part_cur_array[ 0 , 1 ] ) + " : right"
 
 cep()
 logging.debug( "Calling the Abs_Slab routine" )
@@ -386,35 +382,35 @@ abs_array = Abs_Slab( num_Cell , phi_array , SigT , cep )
 
 #Here we print out the absorption rates so we can know them
 print "The absorption rates"
-print str( abs_array[ 0 , 1 ] ) + " : left"
-print str( abs_array[ 0 , 2 ] ) + " : right"
+print str( abs_array[ 0 , 0 ] ) + " : left"
+print str( abs_array[ 0 , 1 ] ) + " : right"
 
 cep()
 logging.debug( "The rhs_column has form" )
 cep()
 if LogLevel <= 10:
-	for row in rhs_column:
+	for row in range( len( rhs_column ) ):
 		logging.debug( str( rhs_column[ row ] ) )
 
 cep()
 logging.debug( "The psi vector has form" )
 cep()
 if LogLevel <= 10:
-	for row in psi_array:
+	for row in range( len( psi_array ) ):
 		logging.debug( str( psi_array[ row ] ) )
 
 cep()
 logging.debug( "The phi vector has form" )
 cep()
 if LogLevel <= 10:
-	for row in phi_array:
+	for row in range( len( phi_array ) ):
 		logging.debug( str( phi_array[ row ] ) )
 
 cep()
 logging.debug( "The cur vector has form" )
 cep()
 if LogLevel <= 10:
-	for row in cur_array:
+	for row in range( len( cur_array ) ):
 		logging.debug( str( cur_array[ row ] ) )
 # Here we print out the matrix to file in a nicely formatted fashion as
 # this helps with debugging
@@ -424,7 +420,7 @@ if LogLevel <= 10:
 	for row in range( ( num_Cell + 1 ) * num_Quad ):
 		outstring = ''
 		for col in range( (num_Cell + 1) * num_Quad ):
-			outstring = outstring + str( matrix[ row , col ] )[0:3] + ' '
+			outstring = outstring + str( coeff_matrix[ row , col ] )[0:3] + ' '
 		logging.debug( outstring )
 logging.debug( "End of file" )
 
