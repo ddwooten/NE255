@@ -163,13 +163,14 @@ num_Quad = int( csvinput[ QRow ][ 0 ] )
 cep()
 logging.debug( "The number of quadrature is given as " + str( num_Quad ) )
 
+# This function generates the rhs of the system of equations to solve
 def RHS_Column( J, N, source, BCL, BCR, cep ):
 	''' This function generates the right hand side solutions column
 		that must be multiplied with the inverse of the 
 		coefficients matrix to get the solution matrix '''
 	cep()	
 	logging.debug( "Begining the RHS_Column routine" )
-	rhs = np.zeros( ( ( J + 1 ) * N , 1 )
+	rhs = np.zeros( ( ( J + 1 ) * N , 1 ) )
 # We populate the rhs with the source terms from input
 	for j in range( J ):
 		for n in range( N ):
@@ -187,6 +188,23 @@ def RHS_Column( J, N, source, BCL, BCR, cep ):
 	logging.debug(" Done applying boundary conditions" )
 	logging.debug(" Exiting the RHS_Column routine" )
 	return(rhs)
+
+# This function will compute our cell averaged fluxes
+def Gen_Phi( J , N , w , psi ):
+	''' This function properly weights and averages
+		an array of edge psi values to get at
+		the cell averaged fluxes '''
+	logging.debug( "Begining the Gen_Phi routine" )
+	phi = np.zeros( ( J , 1 ) )
+	i = 0
+# Here we loop through our psi array and appropriately weight
+# and average ( accorrding to diamond difference ) for phi
+	for j in range( 0 , J , 2 ):
+		for n in range( N ):
+			phi[ i ] = phi[ i ] + ( w[ n ] * psi[ N * j + n ] + \
+				w[ n ] * psi[ N * ( j + 1 ) + n ] ) / 2.0
+		i = i + 1
+	return(phi)
 		
 # This function, taking in various problem parameters as arrays,
 # Will construct the coefficient matrix that we will need
