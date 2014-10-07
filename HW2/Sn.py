@@ -174,7 +174,7 @@ def RHS_Column( J, N, source, BCL, BCR, cep ):
 # We populate the rhs with the source terms from input
 	for j in range( J ):
 		for n in range( N ):
-			rhs[ N * j + n , 0 ] = source[ j ]
+			rhs[ N * j + n , 0 ] = source[ j ] * ( 1.0 / 2.0 )
 	cep()
 	logging.debug( "RHS of primary equations written" )	
 	cep()
@@ -285,7 +285,7 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 # J + 1/2 edge
 			if j + 1 < J:
 				mat[ N * j + n, N * ( j + 1 ) + n ] = ( mu[ n ] / h ) + \
-					 ( St[ j + 1 ] / 2.0 )
+					 ( St[ j ] / 2.0 )
 				logging.debug( "The " + str( N * j + n ) + " row ( " + str( j + 1 ) + \
 					" edge ) and the " + str( N * ( j + 1 ) + n ) + " column ( " \
 					+ str( n ) + " direction ) have value " \
@@ -295,7 +295,7 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 # Calculate the coefficients for the right hand side scattering terms
 			for nprime in range( N ):
 				mat[ N * j + n , N * j + nprime ] = mat[ N * j + n , \
-					N * j + nprime ] - ( w[ nprime ] * ( 1.0 / 2.0 ) ) \
+					N * j + nprime ] - ( w[ nprime ] * ( 1.0 / 4.0 ) ) \
 				* ( S0[ j ] + 3.0 * mu[ n ] * mu[ nprime ] * S1[ j ] ) 
 				logging.debug( "The " + str( N * j + n ) + " row ( " + str( j ) + \
 				" edge ) and the " + str( N * j + nprime ) +  " column ( " + \
