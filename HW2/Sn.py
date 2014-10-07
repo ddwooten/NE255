@@ -299,7 +299,7 @@ logging.debug( "Calling the Build_Matrix routine" )
 # Here we build our coefficient matrix by calling the above function
 coeff_matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , BconL \
 	, BconR , h_Value , mu_array , w_array , cep )
-
+print str( np.linalg.det( coeff_matrix ) )
 np.savetxt( "coeff_matrix.csv" , coeff_matrix , delimiter = "," )
 
 cep()
@@ -307,6 +307,8 @@ logging.debug( "Calling the RHS_Column routine" )
 
 # Here we build the rhs solution vector for our matrix problem
 rhs_column = RHS_Column( num_Cell , num_Quad , src , BconL , BconR , cep )
+
+np.savetxt( "rhs_column.csv" , rhs_column , delimiter = "," )
 
 cep()
 logging.debug( "Calling the numpy linalg solver")
