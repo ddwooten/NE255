@@ -151,7 +151,7 @@ logging.debug(str(SigT))
 h_Value = csvinput[ DimRow ][ 0 ] 
 cep()
 logging.debug( "The width of each cell is given as " + str( h_Value ) )
-num_Cell = int( csvinput[ JRow ][ 0 ] )
+num_Cell = int( csvinput[ JRow ][ 0 ] ) 
 cep()
 logging.debug( "The number of cells is given as " + str( num_Cell ) )
 num_Quad = int( csvinput[ QRow ][ 0 ] )
@@ -164,26 +164,42 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 		the given problem '''
 	cep()
 	logging.debug( "Begining the Build_Matrix routine" )
-	mat = np.zeros( ( J * N , J * N ) )
+	mat = np.zeros( ( ( J + 1 ) * N , ( J + 1 ) * N ) )
 	for j in range( J ):
 		cep()
-		logging.debug( " Working on the " + str( j ) + "th cell" )
+		logging.debug( " Working on the " + str( j ) + " cell" )
 		for n in range( N ):
 			mat[ ( N * j + n ) , ( N * j + n ) ] = ( -mu[ n ] / h )	+ ( St[ j ] / 2 )  
-			logging.debug( "The " + str( N * j + n ) + "th row and the " \
-				+ str( N * j + n ) + "th column have value " \
+			logging.debug( "The " + str( N * j + n ) + " row ( " + str( j ) + \
+				" edge ) and the " + str( N * j + n ) + " column ( " \
+				+ str( n ) + " direction ) have value " \
 				+ str( mat[ N * j + n , N * j + n ] ) )
-			mat[ N * j + n, N * ( j + 1 ) + n ] = ( -mu[ n ] / h ) + \
-			( St[ j + 1 ] / 2 )
-			logging.debug( "The " + str( N * j + n ) + "th row and the " \
-				+ str( N * ( j + 1 ) + n ) + "th column have value " \
-				+ str( mat[ N * j + n , N * ( j + 1 ) + n ] ) )
+			if j + 1 < J:
+				mat[ N * j + n, N * ( j + 1 ) + n ] = ( mu[ n ] / h ) + \
+					 ( St[ j + 1 ] / 2 )
+				logging.debug( "The " + str( N * j + n ) + " row ( " + str( j + 1 ) + \
+					" edge ) and the " + str( N * ( j + 1 ) + n ) + " column ( " \
+					+ str( n ) + " direction ) have value " \
+					+ str( mat[ N * j + n , N * ( j + 1 ) + n ] ) )
 			logging.debug( "Populating the scattering terms" )
 			for nprime in range( N ):
 				mat[ N * j + n , N * j + nprime ] -= ( w[ nprime ] * ( 1 / 2 ) \
 				* ( S0[ j ] + 3 * mu[ n ] * mu[ nprime ] * S1[ j ] ) )
-		logging.debug( "Exiting the Build_Matrix routine" )
+	cep()
+	logging.debug( "Applying boundary conditions" )
+# This is the number of left/right boundary equations that we have
+	n_boundary = int( N / 2 )
+	for n in range( n_boundary )
 		cep()
+		mat[ N * J + ( 1 + 2 * n ) , ( N - n ) ] = 1
+		logging.debug( "The " + str( N * J + ( 1 + 2 * n ) ) + " row ( left BC ) for \
+		the " + str( N - n ) + " direction has value 1" )
+		mat[ N * J + ( 2 + 2 * n ) , N * J + n ] = 1	
+		logging.debug( "The " + str( N + J + ( 2 + 2 * n ) ) + " row ( right BC ) for \
+		the " + str( n ) + " direction has value 1" )
+	logging.debug( "End apply boundary conditions" )
+	logging.debug( "Exiting the Build_Matrix routine" )
+	cep()
 	return( mat )
 cep()
 logging.debug( "Calling the Build_Matrix routine" )
