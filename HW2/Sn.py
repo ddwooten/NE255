@@ -163,6 +163,31 @@ num_Quad = int( csvinput[ QRow ][ 0 ] )
 cep()
 logging.debug( "The number of quadrature is given as " + str( num_Quad ) )
 
+def RHS_Column( J, N, source, BCL, BCR, cep ):
+	''' This function generates the right hand side solutions column
+		that must be multiplied with the inverse of the 
+		coefficients matrix to get the solution matrix '''
+	cep()	
+	logging.debug( "Begining the RHS_Column routine" )
+	rhs = np.zeros( ( ( J + 1 ) * N , 1 )
+# We populate the rhs with the source terms from input
+	for j in range( J ):
+		for n in range( N ):
+			rhs[ N * j + n , 1 ] = source[ j ]
+	cep()
+	logging.debug( "RHS of primary equations written" )	
+	cep()
+	logging.debug( "Applying boundary conditions" )
+# This is the number of left/right boundary equations that we have
+	n_boundary = int( N / 2 )
+# We apply the boundary conditions, reading them from the input
+	for n in range( n_boundary ):
+		rhs[ N * J + ( 2 * n ) , 1 ] = BCL[ n ]
+		rhs[ N * J + ( 1 + 2 * n ) , 1 ] = BCR[ n_boundary - n ]
+	logging.debug(" Done applying boundary conditions" )
+	logging.debug(" Exiting the RHS_Column routine" )
+	return(rhs)
+		
 # This function, taking in various problem parameters as arrays,
 # Will construct the coefficient matrix that we will need
 # to invert to solve a given problem.
@@ -238,6 +263,19 @@ logging.debug( "Calling the Build_Matrix routine" )
 # Here we build our coefficient matrix by calling the above function
 coeff_matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , BconL \
 	, BconR , h_Value , mu_array , w_array , cep )
+
+cep()
+logging.debug( "Calling the RHS_Column routine" )
+cep()
+
+rhs_column = RHS_Column( num_Cell , num_Quad , src , BconL , BconR , cep )
+
+cep()
+logging.debug( "The rhs_column has form" )
+cep()
+if LogLevel <= 10:
+	for row in rhs_column:
+		logging.debug( str( rhs_column[ row ] ) )
 
 # Here we print out the matrix to file in a nicely formatted fashion as
 # this helps with debugging
