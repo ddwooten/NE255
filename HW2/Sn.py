@@ -174,7 +174,7 @@ def RHS_Column( J, N, source, BCL, BCR, cep ):
 # We populate the rhs with the source terms from input
 	for j in range( J ):
 		for n in range( N ):
-			rhs[ N * j + n , 1 ] = source[ j ]
+			rhs[ N * j + n , 0 ] = source[ j ]
 	cep()
 	logging.debug( "RHS of primary equations written" )	
 	cep()
@@ -183,8 +183,8 @@ def RHS_Column( J, N, source, BCL, BCR, cep ):
 	n_boundary = int( N / 2 )
 # We apply the boundary conditions, reading them from the input
 	for n in range( n_boundary ):
-		rhs[ N * J + ( 2 * n ) , 1 ] = BCL[ n ]
-		rhs[ N * J + ( 1 + 2 * n ) , 1 ] = BCR[ n_boundary - n ]
+		rhs[ N * J + ( 2 * n ) , 0 ] = BCL[ n ]
+		rhs[ N * J + ( 1 + 2 * n ) , 0 ] = BCR[ n_boundary - 1 - n ]
 	logging.debug(" Done applying boundary conditions" )
 	logging.debug(" Exiting the RHS_Column routine" )
 	return(rhs)
@@ -283,9 +283,9 @@ def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
 		cep()
 # Calculate the boundary condition coefficients for each edge
 # startign with the mu that is furthest from 0
-		mat[ N * J + ( 2 * n ) , ( N - n ) ] = 1
+		mat[ N * J + ( 2 * n ) , ( N - 1 - n ) ] = 1
 		logging.debug( "The " + str( N * J + ( 1 + 2 * n ) ) + " row ( left BC ) for \
-		the " + str( N - n ) + " direction has value 1" )
+		the " + str( N - 1 - n ) + " direction has value 1" )
 		mat[ N * J + ( 1 + 2 * n ) , N * J + n ] = 1	
 		logging.debug( "The " + str( N * J + ( 2 + 2 * n ) ) + " row ( right BC ) for \
 		the " + str( n ) + " direction has value 1" )
@@ -300,11 +300,22 @@ logging.debug( "Calling the Build_Matrix routine" )
 coeff_matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , BconL \
 	, BconR , h_Value , mu_array , w_array , cep )
 
+np.savetxt( "coeff_matrix.csv" , coeff_matrix , delimiter = "," )
+
 cep()
 logging.debug( "Calling the RHS_Column routine" )
 
 # Here we build the rhs solution vector for our matrix problem
 rhs_column = RHS_Column( num_Cell , num_Quad , src , BconL , BconR , cep )
+
+cep()
+logging.debug( "Calling the numpy linalg solver")
+
+# Here we call a linear algebra matrix solver, part of the numpy
+# package in python, which is itself part of the scientific computing
+# package in python
+
+psi_array = np.linalg.solve( coeff_matrix , rhs_column )
 
 cep()
 logging.debug( "Calling the Gen_Phi routine" )
@@ -324,6 +335,13 @@ cep()
 if LogLevel <= 10:
 	for row in rhs_column:
 		logging.debug( str( rhs_column[ row ] ) )
+
+cep()
+logging.debug( "The psi vector has form" )
+cep()
+if LogLevel <= 10:
+	for row in psi_array:
+		logging.debug( str( psi_array[ row ] ) )
 
 cep()
 logging.debug( "The phi vector has form" )
