@@ -187,7 +187,36 @@ def RHS_Column( J, N, source, BCL, BCR, cep ):
 		rhs[ N * J + ( 1 + 2 * n ) , 0 ] = BCR[ n_boundary - 1 - n ]
 	logging.debug(" Done applying boundary conditions" )
 	logging.debug(" Exiting the RHS_Column routine" )
-	return(rhs)
+	return( rhs )
+
+# This function will compute our partial currents at the boundary
+def Part_Cur( J , N , w , mu , psi , cep ):
+	'''This function will compute the partial currents
+		at the boundary '''
+	cep()
+	logging.debug( "Begining the Part_Cur routine" )
+	part_cur = np.zeros( ( 1 , 2 ) )
+	n_part = int( N / 2.0 )
+	for n in range( n_part ):
+		part_cur[ 1 , 1 ] = part_cur[ 1 , 1 ] + w[ n ] * mu[ n ] * psi[ n , 0 ]
+		part_cur[ 1 , 2 ] = part_cur[ 1 , 2 ] + w[ N - 1 - n ] * mu[ N - 1 - n ] * \
+			psi[ N * J + N - 1 - n , 0 ]
+	logging.debug( "Exiting the Part_Cur routine" )
+	return( part_cur )
+
+#This function will compute our absorption rates in each slab half
+def Abs_Slab( J , phi , St , cep ):
+	'''This function calculates the absorption rate in each
+		half of the cell'''
+	cep()
+	logging.debug( "Begining Abs_Slab routine" )
+	half_slab = int( J / 2 )
+	abs_rate = np.zeros( ( 1 , 2 ) )
+	for j in range ( half_slab ):
+		abs_rate[ 1 , 1 ] = abs_rate[ 1 , 1 ] + phi[ j ] * St[ j ]
+		abs_rate[ 1 , 2 ] = abs_rate[ 1 , 2 ] + phi[ J - j ] * St[ J - j ]
+	logging.debug( "Exiting the Abs_Slab routine" )
+	return( abs_rate )
 
 # This function will compute our cell averaged fluxes
 def Gen_Phi( J , N , w , psi, cep ):
@@ -206,7 +235,7 @@ def Gen_Phi( J , N , w , psi, cep ):
 				w[ n ] * psi[ N * ( j + 1 ) + n , 0 ] ) / 2.0
 		i = i + 1
 	logging.debug( "Exiting the Gen_Phi routine" )
-	return(phi)
+	return( phi )
 
 # This function will compute our cell averaged currents
 def Gen_Cur( J , N , mu , w , psi, cep ):
@@ -223,7 +252,7 @@ def Gen_Cur( J , N , mu , w , psi, cep ):
 				psi[ N * ( j + 1 ) + n , 0 ] ) / 2.0
 		i = i + 1
 	logging.debug( "Exiting the Gen_Cur routine" )
-	return(cur)
+	return( cur )
 				
 # This function, taking in various problem parameters as arrays,
 # Will construct the coefficient matrix that we will need
@@ -325,12 +354,38 @@ logging.debug( "Calling the Gen_Phi routine" )
 # Here we call a function to generate our cell averaged scalar fluxes
 phi_array = Gen_Phi( num_Cell , num_Quad , w_array , psi_array , cep )
 
+# Here we save the phi array as a csv so we can plot it
+np.savetxt( "phi.csv" , phi_array , delimiter = "," )
+
 cep()
 logging.debug( "Calling the Gen_Cur routine" )
 
 # Here we call a function to generate our cell averaged currents
 cur_array = Gen_Cur( num_Cell , num_Quad , mu_array , w_array , psi_array , cep )
- 
+
+cep()
+logging.debug( "Calling the Part_Cur routine" )
+
+# Here we call a function to generate our partial currents at the boundaries
+# with the left boundary as the first entry and the right boundary as the
+# second
+part_cur_array = Part_Cur( num_Cell , num_Quad , w_array , mu_array, psi_array , cep )
+
+#Here we print out the partial currents array so we can know their value
+print str( part_cur_array[ 1 , 1 ] ) + " : left"
+print str( part_cur_array[ 1 , 2 ] ) + " : right"
+
+cep()
+logging.debug( "Calling the Abs_Slab routine" )
+
+# Here we call a function to calculate the absorption rate in each half
+# of the slab
+abs_array = Abs_Slab( num_Cell , phi_array , SigT , cep )
+
+#Here we print out the absorption rates so we can know them
+print str( abs_array[ 1 , 1 ] ) + " : left"
+print str( abs_array[ 1 , 2 ] ) + " : right"
+
 cep()
 logging.debug( "The rhs_column has form" )
 cep()
