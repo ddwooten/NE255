@@ -21,7 +21,7 @@ print "Reading input file"
 
 # This is the csv file from which we will read in cross sx,
 # etc and other code options. In place of user input
-csvfile = open( 'input.csv' , 'r' )
+csvfile = open( 'input3.csv' , 'r' )
 reader = csvreader.reader( csvfile )
 
 # Initilizing the array to hold the inputs
@@ -32,7 +32,6 @@ csvinput = []
 r_index = 0
 for row in reader:
 	csvinput.append( row )
-	print str(csvinput[ r_index ] )
 	for column in range( len(csvinput[ r_index ] ) ):
 		if len( csvinput[ r_index ][ column ] ) != 0:
 			csvinput[ r_index ][ column ] = float( 
@@ -51,7 +50,7 @@ Sig1Row = 3
 SrcRow = 4
 BCLRow = 5
 BCRRow = 6
-CCRow = 7
+SigTRow = 7
 QRow = 8
 JRow = 9
 DimRow = 10
@@ -114,7 +113,7 @@ elif Q_set == 16:
 	mu_array = Mu16
 	w_array = W16
 else:
-	sys.exit( "ERROR!!: Qudrature, row" + str( Q_set ) + " , not set or \
+	sys.exit( "ERROR!!: Qudrature, row" + str( QRow ) + " , not set or \
 	invalid" )
 cep()
 logging.debug( "The quadrature set chosen is Sn " +str( Q_set ) )
@@ -124,5 +123,77 @@ logging.debug( "The corresponding weights array is " )
 logging.debug( str( w_array ) )
 cep()
 
+# Here we define some short hand for various arrays we will need
+src = csvinput[ SrcRow ]
+cep()
+logging.debug( "The source array is given as " )
+logging.debug( str( src ) )
+Sig0 = csvinput[ Sig0Row ]
+cep()
+logging.debug( "The sigma 0 scattering array is given as " )
+logging.debug( str( Sig0 ) )
+Sig1 = csvinput[ Sig1Row ]
+cep()
+logging.debug( "The sigma 1 scattering array is given as " )
+logging.debug( str( Sig0 ) )
+BconL = csvinput[ BCLRow ]
+cep()
+logging.debug( "The left boundary condition array is given as " )
+logging.debug( str( BconL ) )
+BconR = csvinput[ BCRRow ]
+cep()
+logging.debug( "The right boundary condition array is given as " )
+logging.debug( str( BconR ) )
+SigT = csvinput[ SigTRow ]
+cep()
+logging.debug( "The sigma total array is given as " )
+logging.debug(str(SigT))
+h_Value = csvinput[ DimRow ][ 0 ] 
+cep()
+logging.debug( "The width of each cell is given as " + str( h_Value ) )
+num_Cell = int( csvinput[ JRow ][ 0 ] )
+cep()
+logging.debug( "The number of cells is given as " + str( num_Cell ) )
+num_Quad = int( csvinput[ QRow ][ 0 ] )
+cep()
+logging.debug( "The number of quadrature is given as " + str( num_Quad ) )
+
+
+def Build_Matrix( J , N , source , S0 , S1 , St, BCL , BCR , h, mu, w, cep ):
+	''' This function builds our coefficients matrix to solve
+		the given problem '''
+	cep()
+	logging.debug( "Begining the Build_Matrix routine" )
+	mat = np.zeros( ( J * N , J * N ) )
+	for j in range( J ):
+		cep()
+		logging.debug( " Working on the " + str( j ) + "th cell" )
+		for n in range( N ):
+			mat[ ( N * j + n ) , ( N * j + n ) ] = ( -mu[ n ] / h )	+ ( St[ j ] / 2 )  
+			logging.debug( "The " + str( N * j + n ) + "th row and the " \
+				+ str( N * j + n ) + "th column have value " \
+				+ str( mat[ N * j + n , N * j + n ] ) )
+			mat[ N * j + n, N * ( j + 1 ) + n ] = ( -mu[ n ] / h ) + \
+			( St[ j + 1 ] / 2 )
+			logging.debug( "The " + str( N * j + n ) + "th row and the " \
+				+ str( N * ( j + 1 ) + n ) + "th column have value " \
+				+ str( mat[ N * j + n , N * ( j + 1 ) + n ] ) )
+			logging.debug( "Populating the scattering terms" )
+			for nprime in range( N ):
+				mat[ N * j + n , N * j + nprime ] -= ( w[ nprime ] * ( 1 / 2 ) \
+				* ( S0[ j ] + 3 * mu[ n ] * mu[ nprime ] * S1[ j ] ) )
+		logging.debug( "Exiting the Build_Matrix routine" )
+		cep()
+	return( mat )
+cep()
+logging.debug( "Calling the Build_Matrix routine" )
+matrix = Build_Matrix( num_Cell , num_Quad , src , Sig0 , Sig1 , SigT , BconL \
+	, BconR , h_Value , mu_array , w_array , cep )
+cep()
+logging.debug( "The constructed matrix has form" )
+if LogLevel <= 10:
+	for row in matrix:
+		logging.debug( str( matrix[ row , : ] ) )
+logging.debug( "End of file" )
 print "Sn CODE END!!"
 print "*************************************************************"
