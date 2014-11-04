@@ -49,9 +49,6 @@ rand_y = np.random.rand(N)
 below_a = rand_y < ( np.sqrt( 1 - ( rand_x**2 ) ) )
 below_b = rand_y < ( 1 / ( 1 + rand_x**2 ) )
 
-logging.debug('below a array')
-logging.debug(str(below_a))
-
 #Calculate pi approximation
 pi_approx_a = 4.0 * sum( below_a ) / float( N )
 pi_approx_b = 4.0 * sum( below_b ) / float( N )
