@@ -18,7 +18,7 @@ print "*****************************************************"
 print "Pi Approximation CODE BEGIN!"
 
 #Take in the number of samples
-N = rawinput('Please input the number of samples\n')
+N = int( raw_input('Please input the number of samples\n') )
 
 # File names for the log and output files respectively
 LogFileName = 'logfile.dat'
@@ -46,12 +46,15 @@ rand_y = np.random.rand(N)
 
 #Generate the logical vector of if the point are above or under
 #the curve
-above_a = rand_y > ( sqrt( 1 - ( rand_x**2 ) ) )
-above_b = rand_y > ( 1 / ( 1 + rand_x**2 ) )
+below_a = rand_y < ( np.sqrt( 1 - ( rand_x**2 ) ) )
+below_b = rand_y < ( 1 / ( 1 + rand_x**2 ) )
+
+logging.debug('below a array')
+logging.debug(str(below_a))
 
 #Calculate pi approximation
-pi_approx_a = 4 * sum( above_a ) / N
-pi_approx_b = 4 * sum( above_b ) / N
+pi_approx_a = 4.0 * sum( below_a ) / float( N )
+pi_approx_b = 4.0 * sum( below_b ) / float( N )
 
 #Calculate the relative error
 rel_err_a = abs( ( pi_approx_a - np.pi ) / np.pi ) * 100
