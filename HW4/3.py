@@ -53,7 +53,7 @@ logging.debug( 'The iso scattering cross section is ' \
 sig_s1 = 0.2
 logging.debug( 'The an-iso scattering cross section is ' \
     + str( sig_s1 ) )
-sig_a = sig_t - sig_s0
+sig_a = sig_t - sig_s0 / np.pi
 logging.debug( 'The abs cross section is ' + str( sig_a ) )
 sig_array = [ sig_t , sig_s0 , sig_s1 , sig_a ]
 
@@ -63,7 +63,10 @@ absorptions = np.zeros( h )
 leakage = np.zeros( 2 )
 
 #This function will follow the lifespan of one neutron
-def Lifetime( col_counter , abs_counter , leak_counter , xs_array ):
+def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
+                xs_array , cell_width , start_pos() , angle() , \
+                distance() , leakage() , collide() , col_type() , \
+                location() ):
     '''This function caries a neutron through its lifespan'''
 #This is a boolean that will help us track life/death
     alive = TRUE
@@ -76,20 +79,30 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array ):
         dis = distance()
         pos = pos + dis * mu
         leakage( pos , leak_counter , inside )
-        collide( pos , mu , col_counter, abs_counter , alive ,\
-            angle() , col_type() , location() , xs_array )
+        if alive: collide( pos , mu , col_counter, abs_counter , \
+           alive, angle() , col_type() , location() , xs_array , cell_width )
     return()
 
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle() \
-                , col_type() , location() ,  xs ):
+                , col_type() , location() , xs , width ):
     '''This function collides neutrons and hanldes the aftermath'''
     collision = col_type( xs )
+    spatial_bin = location( position , width )
+    if collision > 0: 
+        col[ spatial_bin ] += 1
+        MU = angle()
+    else:
+        absor[ spatial_bin ] += 1
+        existance = FALSE  
+    return()
 
 #This function determines in which spatial bin an interaction occurs
 def location( place , bin_width ):
     '''This function determines in which bin an interaction occurs'''
-    
+       cell = int( math.floor( place / float( bin_width ) ) )
+       return( cell )
+        
 #This function will determine if the neutron leaked
 def leakage( location , leak_array , present ):
     '''This function tracks leakage'''
@@ -102,9 +115,9 @@ def col_type( csx_array ):
     '''Ths function determines the collision type'''
     quanta = np.random.random( 1 )
     if quanta <= csx_array[ 3 ] / csx_array[ 0 ]:
-        col_type = 0
+        col_type = int( 0 )
     else:
-        col_type = 1
+        col_type = int( 1 )
     return( col_type )
 
 #This function generates a start position for our neutron
