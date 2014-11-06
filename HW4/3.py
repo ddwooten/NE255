@@ -6,6 +6,7 @@ import logging as logging
 import time as time
 import sys as sys
 import numpy as np
+import math as math
 
 # Function, refer to docstring for purpose
 def cep():
@@ -19,6 +20,9 @@ print "Pi Approximation CODE BEGIN!"
 
 #Take in the number of samples
 N = int( raw_input('Please input the number of samples\n') )
+
+#Define the number of spatial bins
+h = 100
 
 # File names for the log and output files respectively
 LogFileName = 'logfile.dat'
@@ -51,22 +55,57 @@ logging.debug( 'The an-iso scattering cross section is ' \
     + str( sig_s1 ) )
 sig_a = sig_t - sig_s0
 logging.debug( 'The abs cross section is ' + str( sig_a ) )
+sig_array = [ sig_t , sig_s0 , sig_s1 , sig_a ]
 
 #Lets initilize our holding arrays
-collisions = np.zeros(N)
-absorptions = np.zeros(N)
-leakage = np.zeros(2)
+collisions = np.zeros( h )
+absorptions = np.zeros( h )
+leakage = np.zeros( 2 )
 
 #This function will follow the lifespan of one neutron
-def Lifetime():
+def Lifetime( col_counter , abs_counter , leak_counter , xs_array ):
     '''This function caries a neutron through its lifespan'''
+#This is a boolean that will help us track life/death
+    alive = TRUE
+#This is a boolean that will help us track leakage
+    inside = TRUE
     pos = start_pos()
     mu = angle()
 #Here we begin the tracking loop
-    while ( pos >= 0.0 and pos <= 8.0 ):
+    while ( inside and alive ):
         dis = distance()
-        pos = pos + dis * 
+        pos = pos + dis * mu
+        leakage( pos , leak_counter , inside )
+        collide( pos , mu , col_counter, abs_counter , alive ,\
+            angle() , col_type() , location() , xs_array )
+    return()
 
+#This function will handle colliding neutrons
+def collide( position , MU , col , absor , existance , angle() \
+                , col_type() , location() ,  xs ):
+    '''This function collides neutrons and hanldes the aftermath'''
+    collision = col_type( xs )
+
+#This function determines in which spatial bin an interaction occurs
+def location( place , bin_width ):
+    '''This function determines in which bin an interaction occurs'''
+    
+#This function will determine if the neutron leaked
+def leakage( location , leak_array , present ):
+    '''This function tracks leakage'''
+    if location > 8.0: present = FALSE ; leak_array[ 1 ] += 1
+    if location < 0.0: present = FALSE ; leak_array[ 0 ] += 1
+    return()
+
+#This function determines the collision type
+def col_type( csx_array ):
+    '''Ths function determines the collision type'''
+    quanta = np.random.random( 1 )
+    if quanta <= csx_array[ 3 ] / csx_array[ 0 ]:
+        col_type = 0
+    else:
+        col_type = 1
+    return( col_type )
 
 #This function generates a start position for our neutron
 def start_pos( cep ):
@@ -81,7 +120,7 @@ def angle( cep ):
     '''This function generates a random angle on (-1,1)'''
     sign = np.random.randint( 2 )
     ang = np.random.random( 1 )
-    if sign == 0 ang = ang * -1.0
+    if sign == 0: ang = ang * -1.0
     cep()
     logging.debug( 'The angle of travel is ' + str( ang )
     return( ang )
