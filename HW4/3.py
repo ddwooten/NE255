@@ -70,6 +70,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
                 location() , new_angle() , cep() ):
     '''This function caries a neutron through its lifespan'''
     cep()
+    cep()
     logging.debug( 'Starting new neutron history' )
 #This is a boolean that will help us track life/death
     alive = TRUE
@@ -130,24 +131,51 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
 
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle() \
-                , col_type() , location() , xs , width ):
+                , col_type() , location() , xs , width , cep() ):
     '''This function collides neutrons and hanldes the aftermath'''
+    cep()
+    cep()
+    logging.debug( 'Entering the colision routine' )
 #Determine the type of collision
     collision = col_type( xs )
+    cep()
+    logging.debug( 'Collision of type: ' + str( collision ) )
 #Determine the spatial bin this occured in
     spatial_bin = location( position , width )
+    cep()
+    logging.debug( 'Spatial bin of: ' + str( spatial_bin ) )
 #If the collision was a scatter
     if collision > 0:
+        cep()
+        logging.debug( 'Collision was a scatter' )
 #Tabulate the collision 
+        cep()
+        logging.debug( 'Collision count before tabulation: ' )
+        logging.debug( 'Spatial bin: ' + str( spatial_bin ) \
+            + ' has ' + str( col[ spatial_bin ] ) )
         col[ spatial_bin ] += 1
+        logging.debug( 'Collision count in bin ' + \
+            str( spatial_bin ) + ' now: ' + \
+            str( col[ spatial_bin ] ) ) 
 #Get a new angle post scatter
+        cep()
+        logging.debug( 'Incoming angle: ' + str( MU ) )
         MU = new_angle( MU , xs )
+        cep()
+        logging.debug( 'Outgoing angle: ' + str( MU ) ) 
 #If the collision was an abosrption
     else:
 #Tabulate the absorption
+        cep()
+        logging.debug( 'Collision was an absorption' )
+        logging.debug( 'Abs count in bin ' + str( spatial_bin )  \
+            + ' is: ' + str( absor[ spatial_bin ] ) )
         absor[ spatial_bin ] += 1
+        logging.debug( 'Count is now: ' + str( absor[ spatial_bin ] ) )
 #And "kill" the  nuetron
         existance = FALSE  
+        cep()
+        logging.debug( 'Neutron is now alive: ' + str( existance ) )
     return()
 
 #This function calculates an outgoing angle post scattering
