@@ -53,8 +53,9 @@ logging.debug( 'The iso scattering cross section is ' \
 sig_s1 = 0.2
 logging.debug( 'The an-iso scattering cross section is ' \
     + str( sig_s1 ) )
-sig_a = sig_t - sig_s0 / np.pi
+sig_a = sig_t - sig_s0 
 logging.debug( 'The abs cross section is ' + str( sig_a ) )
+#Cross section array
 sig_array = [ sig_t , sig_s0 , sig_s1 , sig_a ]
 
 #Lets initilize our holding arrays
@@ -66,36 +67,62 @@ leakage = np.zeros( 2 )
 def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
                 xs_array , cell_width , start_pos() , angle() , \
                 distance() , leakage() , collide() , col_type() , \
-                location() ):
+                location() , new_angle() ):
     '''This function caries a neutron through its lifespan'''
 #This is a boolean that will help us track life/death
     alive = TRUE
 #This is a boolean that will help us track leakage
     inside = TRUE
+#Start the neutron off with a position and an angle 
     pos = start_pos()
     mu = angle()
 #Here we begin the tracking loop
+#While the neutron is both not absorbed and not leaked
     while ( inside and alive ):
+#Get the total distance traveled
         dis = distance()
+#Project onto the x axis
         pos = pos + dis * mu
+#Check for leakage
         leakage( pos , leak_counter , inside )
+#If the neutron didn't leak, collide it
         if alive: collide( pos , mu , col_counter, abs_counter , \
-           alive, angle() , col_type() , location() , xs_array , cell_width )
+           alive, angle() , col_type() , location() , xs_array , cell_width\
+           , new_angle() )
     return()
 
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle() \
                 , col_type() , location() , xs , width ):
     '''This function collides neutrons and hanldes the aftermath'''
+#Determine the type of collision
     collision = col_type( xs )
+#Determine the spatial bin this occured in
     spatial_bin = location( position , width )
-    if collision > 0: 
+#If the collision was a scatter
+    if collision > 0:
+#Tabulate the collision 
         col[ spatial_bin ] += 1
-        MU = angle()
+#Get a new angle post scatter
+        MU = new_angle( MU , xs )
+#If the collision was an abosrption
     else:
+#Tabulate the absorption
         absor[ spatial_bin ] += 1
+#And "kill" the  nuetron
         existance = FALSE  
     return()
+
+#This function calculates an outgoing angle post scattering
+def new_angle( incoming , x_sec ):
+    '''This function calculates an outgoing aniso angle'''
+#We define the average scattering angle
+    mu_bar = x_sec[ 2 ] / x_sec[ 1 ]
+#Calculate the new mu post scattering
+    new_mu = -1 + np.sqrt( 1 - 3 * incoming * mu_bar * [ \
+        2 * ( 1 - 2 * np.random.random(1) ) -3 * incoming * \
+        mu_bar ] ) / ( 3 * incoming * mu_bar )
+    return( new_mu )
 
 #This function determines in which spatial bin an interaction occurs
 def location( place , bin_width ):
@@ -113,9 +140,14 @@ def leakage( location , leak_array , present ):
 #This function determines the collision type
 def col_type( csx_array ):
     '''Ths function determines the collision type'''
+#Random number between 0 and 1
     quanta = np.random.random( 1 )
+#If said rand num is less than the ratio of the abs
+#   cross section to the total, the collision
+#   was an absorption
     if quanta <= csx_array[ 3 ] / csx_array[ 0 ]:
         col_type = int( 0 )
+#Otherwise it was a scatter
     else:
         col_type = int( 1 )
     return( col_type )
@@ -131,8 +163,11 @@ def start_pos( cep ):
 #This function generates a random angle on (-1,1)
 def angle( cep ):
     '''This function generates a random angle on (-1,1)'''
+#Easier to assign a negative this way
     sign = np.random.randint( 2 )
+#Get a random number between 0 and 1 for angle
     ang = np.random.random( 1 )
+#Assign the sign value
     if sign == 0: ang = ang * -1.0
     cep()
     logging.debug( 'The angle of travel is ' + str( ang )
