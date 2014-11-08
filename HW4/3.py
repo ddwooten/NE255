@@ -76,11 +76,11 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
     cep()
     logging.debug( 'Starting new neutron history' )
 #This is a boolean that will help us track life/death
-    alive = TRUE
+    alive = True
     cep()
     logging.debug( 'Neutron is alive: ' + str( alive ) )
 #This is a boolean that will help us track leakage
-    inside = TRUE
+    inside = True
     cep()
     logging.debug( 'Neutron is inside: ' + str( inside ) )
 #Start the neutron off with a position and an angle 
@@ -179,7 +179,7 @@ def collide( position , MU , col , absor , existance , angle \
         absor[ spatial_bin ] += 1
         logging.debug( 'Count is now: ' + str( absor[ spatial_bin ] ) )
 #And "kill" the  nuetron
-        existance = FALSE  
+        existance = False  
         cep()
         logging.debug( 'Neutron is now alive: ' + str( existance ) )
     logging.debug( 'Leaving the collision function' )
@@ -228,8 +228,8 @@ def leakage( location , leak_array , present , cep ):
     logging.debug( 'Location is: ' + str( location ) )
     logging.debug( 'Left leakage is: ' + str( leak_array[ 0 ] ) )
     logging.debug( 'Right leakage is: ' + str( leak_array[ 1 ] ) )
-    if location > 8.0: present = FALSE ; leak_array[ 1 ] += 1
-    if location < 0.0: present = FALSE ; leak_array[ 0 ] += 1
+    if location > 8.0: present = False ; leak_array[ 1 ] += 1
+    if location < 0.0: present = False ; leak_array[ 0 ] += 1
     cep()
     logging.debug( 'Neutron is inside: ' + str( present ) )
     logging.debug( 'Left leakage is: ' + str( leak_array[ 0 ] ) )
@@ -321,7 +321,7 @@ for i in range( N ):
      Lifetime( collisions , absorptions , leakage , sig_array , \
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
-                    location , new_angle , cep ):
+                    location , new_angle , cep )
 
 
 # Let the user know it has all ended
