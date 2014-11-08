@@ -67,28 +67,65 @@ leakage = np.zeros( 2 )
 def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
                 xs_array , cell_width , start_pos() , angle() , \
                 distance() , leakage() , collide() , col_type() , \
-                location() , new_angle() ):
+                location() , new_angle() , cep() ):
     '''This function caries a neutron through its lifespan'''
+    cep()
+    logging.debug( 'Starting new neutron history' )
 #This is a boolean that will help us track life/death
     alive = TRUE
+    cep()
+    logging.debug( 'Neutron is alive: ' + str( alive ) )
 #This is a boolean that will help us track leakage
     inside = TRUE
+    cep()
+    logging.debug( 'Neutron is inside: ' + str( inside ) )
 #Start the neutron off with a position and an angle 
     pos = start_pos()
+    cep()
+    logging.debug( 'Neutron is starting at: ' + str( pos ) )
     mu = angle()
+    cep()
+    logging.debug( 'Neutron has angle: ' + str( mu ) )
+#Counter for number of loops
+    num_col = 0
 #Here we begin the tracking loop
 #While the neutron is both not absorbed and not leaked
     while ( inside and alive ):
+        cep()
+        logging.debug( 'Tracking collision number: ' + str( num_col ) )
 #Get the total distance traveled
         dis = distance()
+        cep()
+        logging.debug( 'Neutron is traveling distance: ' + \
+            str( dis ) )
+        cep()
+        logging.debug( 'Projected distance is: ' + str( dis * mu ) )
 #Project onto the x axis
         pos = pos + dis * mu
+        cep()
+        logging.debug( 'New position is: ' + str( pos ) )
 #Check for leakage
+        cep()
+        logging.debug( 'Checking for leakage' )
         leakage( pos , leak_counter , inside )
+        logging.debug( 'Neutron is inside: ' + str( inside ) )
+        logging.debug( 'Neutron is alive: ' + str( alive ) )
 #If the neutron didn't leak, collide it
+        cep()
+        logging.debug( 'Colliding neutron if alive:' )
+        logging.debug( 'Parameters before collision: ' )
+        logging.debug( 'Incoming angle is: ' + str( mu ) )
         if alive: collide( pos , mu , col_counter, abs_counter , \
            alive, angle() , col_type() , location() , xs_array , cell_width\
            , new_angle() )
+        cep()
+        logging.debug( 'Neutron parameters post collision: ' )
+        logging.debug( 'Outgoing angle is: ' + str( mu ) )
+        cep()
+        logging.debug( 'Neutron is alive: ' + str( alive ) )
+        logging.debug( 'Neutron is inside: ' + str( inside ) )
+#Increment the collision number
+        num_col += 1
     return()
 
 #This function will handle colliding neutrons
