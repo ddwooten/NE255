@@ -14,6 +14,13 @@ def cep():
 	debug level '''
 	logging.debug( "*****************************************************" )
 	return()
+
+#Function, refer to docstring for purpose
+def sep():
+    '''A wrapper to visually seperate functions in log files'''
+    logging.debug( '//////////////////////////////////////////////////////' )
+    return()
+
 # Let the user know that the code is running
 print "*****************************************************"
 print "Pi Approximation CODE BEGIN!"
@@ -70,10 +77,9 @@ leak_array = np.zeros( 2 )
 def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
                 cell_width , start_pos , angle , \
                 distance , leakage , collide , col_type , \
-                location , new_angle , cep ):
+                location , new_angle , cep , sep ):
     '''This function caries a neutron through its lifespan'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Starting new neutron history' )
 #This is a boolean that will help us track life/death
     alive = True
@@ -84,10 +90,10 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
     cep()
     logging.debug( 'Neutron is inside: ' + str( inside ) )
 #Start the neutron off with a position and an angle 
-    pos = start_pos( cep )
+    pos = start_pos( cep , sep )
     cep()
     logging.debug( 'Neutron is starting at: ' + str( pos ) )
-    mu = angle( cep )
+    mu = angle( cep , sep )
     cep()
     logging.debug( 'Neutron has angle: ' + str( mu ) )
 #Counter for number of loops
@@ -98,7 +104,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
         cep()
         logging.debug( 'Tracking collision number: ' + str( num_col ) )
 #Get the total distance traveled
-        dis = distance( xs_array[ 0 ] ,  cep )
+        dis = distance( xs_array[ 0 ] ,  cep , sep )
         cep()
         logging.debug( 'Neutron is traveling distance: ' + \
             str( dis ) )
@@ -111,7 +117,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
 #Check for leakage
         cep()
         logging.debug( 'Checking for leakage' )
-        leakage( pos , leak_counter , inside , cep)
+        leakage( pos , leak_counter , inside , cep , sep )
         logging.debug( 'Neutron is inside: ' + str( inside ) )
         logging.debug( 'Neutron is alive: ' + str( alive ) )
 #If the neutron didn't leak, collide it
@@ -121,7 +127,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
         logging.debug( 'Incoming angle is: ' + str( mu ) )
         if alive: collide( pos , mu , col_counter, abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
-           , new_angle , cep )
+           , new_angle , cep , sep )
         cep()
         logging.debug( 'Neutron parameters post collision: ' )
         logging.debug( 'Outgoing angle is: ' + str( mu ) )
@@ -131,23 +137,21 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
 #Increment the collision number
         num_col += 1
     logging.debug( 'Terminating neutron history' )
-    cep()
-    cep()
+    sep()
     return()
 
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle \
-                , col_type , location , xs , width , new_angle , cep ):
+                , col_type , location , xs , width , new_angle , cep , sep ):
     '''This function collides neutrons and hanldes the aftermath'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the colision routine' )
 #Determine the type of collision
-    collision = col_type( xs , cep )
+    collision = col_type( xs , cep , sep )
     cep()
     logging.debug( 'Collision of type: ' + str( collision ) )
 #Determine the spatial bin this occured in
-    spatial_bin = location( position , width , cep )
+    spatial_bin = location( position , width , cep , sep )
     cep()
     logging.debug( 'Spatial bin of: ' + str( spatial_bin ) )
 #If the collision was a scatter
@@ -166,7 +170,7 @@ def collide( position , MU , col , absor , existance , angle \
 #Get a new angle post scatter
         cep()
         logging.debug( 'Incoming angle: ' + str( MU ) )
-        MU = new_angle( MU , xs , cep )
+        MU = new_angle( MU , xs , cep , sep )
         cep()
         logging.debug( 'Outgoing angle: ' + str( MU ) ) 
 #If the collision was an abosrption
@@ -183,15 +187,13 @@ def collide( position , MU , col , absor , existance , angle \
         cep()
         logging.debug( 'Neutron is now alive: ' + str( existance ) )
     logging.debug( 'Leaving the collision function' )
-    cep()
-    cep()
+    sep()
     return()
 
 #This function calculates an outgoing angle post scattering
-def new_angle( incoming , x_sec , cep ):
+def new_angle( incoming , x_sec , cep , sep ):
     '''This function calculates an outgoing aniso angle'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the new_angle function' )
 #We define the average scattering angle
     mu_bar = x_sec[ 2 ] / x_sec[ 1 ]
@@ -202,28 +204,24 @@ def new_angle( incoming , x_sec , cep ):
     cep()
     logging.debug( 'Outgoing angle is: ' + str( new_mu ) )
     logging.debug( 'Leaving the new_angle function' )
-    cep()
-    cep()
+    sep()
     return( new_mu )
 
 #This function determines in which spatial bin an interaction occurs
-def location( place , bin_width , cep ):
+def location( place , bin_width , cep , sep ):
     '''This function determines in which bin an interaction occurs'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the location function' )
     cell = int( math.floor( place / float( bin_width ) ) )
     logging.debug( 'Cell is: ' + str( cell ) )
     logging.debug( 'Leaving the location function' )
-    cep()
-    cep()
+    sep()
     return( cell )
         
 #This function will determine if the neutron leaked
-def leakage( location , leak_array , present , cep ):
+def leakage( location , leak_array , present , cep , sep ):
     '''This function tracks leakage'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the leakage function ' )
     logging.debug( 'Location is: ' + str( location ) )
     logging.debug( 'Left leakage is: ' + str( leak_array[ 0 ] ) )
@@ -235,16 +233,14 @@ def leakage( location , leak_array , present , cep ):
     logging.debug( 'Left leakage is: ' + str( leak_array[ 0 ] ) )
     logging.debug( 'Right leakage is: ' + str( leak_array[ 1 ] ) )
     logging.debug( 'Leaving the leakage function' )
-    cep()
-    cep()
+    sep()
     return()
 
 #This function determines the collision type
-def col_type( csx_array , cep ):
+def col_type( csx_array , cep , sep ):
     '''Ths function determines the collision type'''
 #Random number between 0 and 1
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the col_type function' )
     quanta = np.random.random( 1 )
     cep()
@@ -265,29 +261,25 @@ def col_type( csx_array , cep ):
         logging.debug( 'Collision type is: ' +\
            str( col_type ) )
     logging.debug( 'Leaving the col_type function' )
-    cep()
-    cep()
+    sep()
     return( col_type )
 
 #This function generates a start position for our neutron
-def start_pos( cep ):
+def start_pos( cep , sep ):
     '''This function generates a start pos for our neutron'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the start_pos function' )
     pos = np.random.random( 1 ) * 4.0
     cep()
     logging.debug( 'The starting position is ' + str( pos ) )
     logging.debug( 'Leaving the start_pos function' )
-    cep()
-    cep()
+    sep()
     return( pos )
 
 #This function generates a random angle on (-1,1)
-def angle( cep ):
+def angle( cep , sep ):
     '''This function generates a random angle on (-1,1)'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the angle function' )
 #Easier to assign a negative this way
     sign = np.random.randint( 2 )
@@ -299,21 +291,18 @@ def angle( cep ):
     if sign == 0: ang = ang * -1.0
     logging.debug( 'Angle is: ' + str( ang ) )
     logging.debug( 'Leaving the angle function' )
-    cep()
-    cep()
+    sep()
     return( ang )
 
 #This function will give us the distance our neutron travels
-def distance( t_sig , cep ):
+def distance( t_sig , cep , sep ):
     '''This function calculates distance to next collision'''
-    cep()
-    cep()
+    sep()
     logging.debug( 'Entering the distance function' )
     dis = -np.log( np.random.random( 1 ) ) / t_sig
     logging.debug( 'The calculated distance is ' + str( dis ) )
     logging.debug( 'Leaving the distance function' )
-    cep()
-    cep()
+    sep()
     return( dis )
 
 #Lets begin our neutron histories loop
@@ -321,7 +310,7 @@ for i in range( N ):
      Lifetime( collisions , absorptions , leak_array , sig_array , \
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
-                    location , new_angle , cep )
+                    location , new_angle , cep , sep )
 
 
 # Let the user know it has all ended
