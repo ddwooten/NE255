@@ -137,7 +137,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
 
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle \
-                , col_type , location , xs , width , cep ):
+                , col_type , location , xs , width , new_angle , cep ):
     '''This function collides neutrons and hanldes the aftermath'''
     cep()
     cep()
