@@ -64,7 +64,7 @@ sig_array = [ sig_t , sig_s0 , sig_s1 , sig_a ]
 #Lets initilize our holding arrays
 collisions = np.zeros( h )
 absorptions = np.zeros( h )
-leakage = np.zeros( 2 )
+leak_array = np.zeros( 2 )
 
 #This function will follow the lifespan of one neutron
 def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
@@ -318,7 +318,7 @@ def distance( t_sig , cep ):
 
 #Lets begin our neutron histories loop
 for i in range( N ):
-     Lifetime( collisions , absorptions , leakage , sig_array , \
+     Lifetime( collisions , absorptions , leak_array , sig_array , \
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
                     location , new_angle , cep )
