@@ -117,7 +117,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
 #Check for leakage
         cep()
         logging.debug( 'Checking for leakage' )
-        leakage( pos , leak_counter , inside , cep , sep )
+        inside = leakage( pos , leak_counter , inside , cep , sep )
         logging.debug( 'Neutron is inside: ' + str( inside ) )
         logging.debug( 'Neutron is alive: ' + str( alive ) )
 #If the neutron didn't leak, collide it
@@ -125,7 +125,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
         logging.debug( 'Colliding neutron if alive:' )
         logging.debug( 'Parameters before collision: ' )
         logging.debug( 'Incoming angle is: ' + str( mu ) )
-        if alive: collide( pos , mu , col_counter, abs_counter , \
+        if alive: alive = collide( pos , mu , col_counter, abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
            , new_angle , cep , sep )
         cep()
@@ -188,7 +188,7 @@ def collide( position , MU , col , absor , existance , angle \
         logging.debug( 'Neutron is now alive: ' + str( existance ) )
     logging.debug( 'Leaving the collision function' )
     sep()
-    return()
+    return( existance )
 
 #This function calculates an outgoing angle post scattering
 def new_angle( incoming , x_sec , cep , sep ):
@@ -198,9 +198,9 @@ def new_angle( incoming , x_sec , cep , sep ):
 #We define the average scattering angle
     mu_bar = x_sec[ 2 ] / x_sec[ 1 ]
 #Calculate the new mu post scattering
-    new_mu = -1 + np.sqrt( 1 - 3 * incoming * mu_bar * [ \
+    new_mu = -1 + math.sqrt( 1 - 3 * incoming * mu_bar * ( \
         2 * ( 1 - 2 * np.random.random(1) ) -3 * incoming * \
-        mu_bar ] ) / ( 3 * incoming * mu_bar )
+        mu_bar ) ) / ( 3 * incoming * mu_bar )
     cep()
     logging.debug( 'Outgoing angle is: ' + str( new_mu ) )
     logging.debug( 'Leaving the new_angle function' )
@@ -234,7 +234,7 @@ def leakage( location , leak_array , present , cep , sep ):
     logging.debug( 'Right leakage is: ' + str( leak_array[ 1 ] ) )
     logging.debug( 'Leaving the leakage function' )
     sep()
-    return()
+    return( present )
 
 #This function determines the collision type
 def col_type( csx_array , cep , sep ):
