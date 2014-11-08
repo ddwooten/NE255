@@ -24,6 +24,9 @@ N = int( raw_input('Please input the number of samples\n') )
 #Define the number of spatial bins
 h = 100
 
+#Define cell length
+cell_length = 8.0 / float( h )
+
 # File names for the log and output files respectively
 LogFileName = 'logfile.dat'
 
@@ -65,7 +68,7 @@ leakage = np.zeros( 2 )
 
 #This function will follow the lifespan of one neutron
 def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
-                xs_array , cell_width , start_pos , angle , \
+                cell_width , start_pos , angle , \
                 distance , leakage , collide , col_type , \
                 location , new_angle , cep ):
     '''This function caries a neutron through its lifespan'''
@@ -314,7 +317,11 @@ def distance( t_sig , cep ):
     return( dis )
 
 #Lets begin our neutron histories loop
-for i in range( N )
+for i in range( N ):
+     Lifetime( collisions , absorptions , leakage , sig_array , \
+                    cell_length , start_pos , angle , \
+                    distance , leakage , collide , col_type , \
+                    location , new_angle , cep ):
 
 
 # Let the user know it has all ended
