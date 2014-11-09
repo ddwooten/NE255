@@ -305,6 +305,29 @@ def distance( t_sig , cep , sep ):
     sep()
     return( dis )
 
+#This function will calculate the flux distribution based
+#   on the collision flux estimator
+def flux_collision( col_array , abs_array , num_part , cell_width, \
+                        num_bins , xs_array, cep , sep ):
+    '''This function will calculate the collision estimated flux 
+        as well as its error and write these to csv files '''
+        sep()
+        logging.debug( 'Entering the flux_collision function' )
+#Define total interaction array
+        interactions = col_array + abs_array
+#Initialize the phi array
+        phi = np.zeros[ 1 , num_bins ]
+#Calculate collision flux
+        phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
+            float ( cell_width ) * float( num_part ) )
+#Calculate estimated mean
+        est_mean = ( interactions ) / float( num_part )
+#Calculate phi error
+        phi[ 1 ] = np.square( interactions - est_mean ) / \
+            ( float( num_part - 1 ) )
+        return( phi ) 
+        
+
 #Lets begin our neutron histories loop
 for i in range( N ):
      Lifetime( collisions , absorptions , leak_array , sig_array , \
