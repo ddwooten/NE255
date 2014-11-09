@@ -319,14 +319,16 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
         phi = np.zeros[ 1 , num_bins ]
 #Calculate collision flux
         phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
-            float ( cell_width ) * float( num_part ) )
+            float( cell_width ) * float( num_part ) )
 #Calculate estimated mean
         est_mean = ( interactions ) / float( num_part )
 #Calculate phi error
-        phi[ 1 ] = np.square( interactions - est_mean ) / \
-            ( float( num_part - 1 ) )
+        phi[ 1 ] = ( np.square( interactions - est_mean ) / \
+            ( float( num_part - 1 ) ) ) / ( xs_array[ 0 ] * \
+                float( cell_width ) * float( num_part ) )
         return( phi ) 
-        
+
+#This function will calculate the abs rate in slab halves        
 
 #Lets begin our neutron histories loop
 for i in range( N ):
