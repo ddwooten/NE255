@@ -34,6 +34,11 @@ h = 100
 #Define cell length
 cell_length = 8.0 / float( h )
 
+#Lets initilize our holding arrays
+collisions = np.zeros( h )
+absorptions = np.zeros( h )
+leak_array = np.zeros( 2 )
+
 # File names for the log and output files respectively
 LogFileName = 'logfile.dat'
 
@@ -67,11 +72,6 @@ sig_a = sig_t - sig_s0
 logging.debug( 'The abs cross section is ' + str( sig_a ) )
 #Cross section array
 sig_array = [ sig_t , sig_s0 , sig_s1 , sig_a ]
-
-#Lets initilize our holding arrays
-collisions = np.zeros( h )
-absorptions = np.zeros( h )
-leak_array = np.zeros( 2 )
 
 #This function will follow the lifespan of one neutron
 def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
@@ -336,11 +336,37 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
         phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / sum( nn_phi ) ) \
             + ( np.square( nn_phi ) / ( sum( nn_phi )**2 ) ) * \
             sum_error )
+        logging.debug( 'Leaving the flux_collision function' )
+        sep()
         return( phi ) 
 
 #This function will calculate the abs rate in slab halves        
-
-#Lets begin our neutron histories loop
+def abs_half_cells( abs_array , cep , sep ):
+    '''This function calculates abs rates and probabilities in
+       half-cells'''
+       sep()
+       logging.debug( 'Entering the abs_half_cell function' )
+#Array index of right end of left half of cell
+       h_index = len( abs_array ) / 2 - 1
+       logging.debug( 'Index of right end of left cell:' \
+        + str( h_index ) )
+#Initilize the array
+       abs_report = np.zeros( 1 , 1 )
+       total_abs = float( sum( abs_array ) )
+       abs_report[ 0 , 0 ] = total_abs - sum( abs_array , \
+        h_index + 1 )
+       abs_report[ 0 , 1 ] = sum( abs_array , h_index + 1 )
+       logging.debug( 'Absorption half cell array: ' )
+       logging.debug( str( abs_report[ 0 ] )
+       logging.debug( 'Total absorption is: ' + \
+        str( total_abs ) )
+       abs_report[ 1 ] = abs_report[ 0 ] / total_abs
+       logging.debug( 'Abs probability half cell array:' )
+       logging.debug( str( abs_report[ 1 ] )
+       logging.debug( 'Leaving the abs_half_cell function' )
+       sep()
+       return( abs_report )
+Lets begin our neutron histories loop
 for i in range( N ):
      Lifetime( collisions , absorptions , leak_array , sig_array , \
                     cell_length , start_pos , angle , \
