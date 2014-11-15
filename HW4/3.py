@@ -366,7 +366,19 @@ def abs_half_cells( abs_array , cep , sep ):
        logging.debug( 'Leaving the abs_half_cell function' )
        sep()
        return( abs_report )
-Lets begin our neutron histories loop
+
+#This function will calculate our leakage prob
+def currents( l_array , num_part ):
+    '''This function will produce leakage prob'''
+    sep()
+    logging.debug( 'Entering the currents function'''
+#Generate leakage probabilities
+    cur_report = l_array / float( num_part )
+    logging.debug( 'Leaving the currents function' )
+    sep()
+    return( cur_report )
+
+#Lets begin our neutron histories loop
 for i in range( N ):
      Lifetime( collisions , absorptions , leak_array , sig_array , \
                     cell_length , start_pos , angle , \
