@@ -312,72 +312,73 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
                         num_bins , xs_array, cep , sep ):
     '''This function will calculate the collision estimated flux 
         as well as its error and write these to csv files '''
-        sep()
-        logging.debug( 'Entering the flux_collision function' )
+    sep()
+    logging.debug( 'Entering the flux_collision function' )
 #Define total interaction array
-        interactions = col_array + abs_array
+    interactions = col_array + abs_array
 #Initialize the phi array
-        phi = np.zeros[ 1 , num_bins ]
+    phi = np.zeros[ 1 , num_bins ]
 #Calculate collision flux
-        phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
-            float( cell_width ) * float( num_part ) )
+    phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
+        float( cell_width ) * float( num_part ) )
 #Store non-normalized flux
-        nn_phi = phi[ 0 ]
+    nn_phi = phi[ 0 ]
 #Normalize collision flux
-        phi[ 0 ] = phi[ 0 ] / sum( phi[ 0 ] )
+    phi[ 0 ] = phi[ 0 ] / sum( phi[ 0 ] )
 #Calculate estimated mean
-        est_mean = ( interactions ) / float( num_part )
+    est_mean = ( interactions ) / float( num_part )
 #Calculate phi error
-        phi[ 1 ] = np.sqrt( ( np.square( interactions - est_mean ) / \
-            ( float( num_part - 1 ) ) ) / ( xs_array[ 0 ] * \
-                float( cell_width ) * float( num_part ) ) )
+    phi[ 1 ] = np.sqrt( ( np.square( interactions - est_mean ) / \
+        ( float( num_part - 1 ) ) ) / ( xs_array[ 0 ] * \
+            float( cell_width ) * float( num_part ) ) )
 #Store error associated with the sum of the nn_phi array
-        sum_error = math.sqrt( sum( np.square( phi[ 1 ] ) ) )
+    sum_error = math.sqrt( sum( np.square( phi[ 1 ] ) ) )
 #Calculate the normalized flux error
-        phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / sum( nn_phi ) ) \
-            + ( np.square( nn_phi ) / ( sum( nn_phi )**2 ) ) * \
-            sum_error )
-        logging.debug( 'Leaving the flux_collision function' )
-        sep()
-        return( phi ) 
+    phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / sum( nn_phi ) ) \
+        + ( np.square( nn_phi ) / ( sum( nn_phi )**2 ) ) * \
+        sum_error )
+    logging.debug( 'Leaving the flux_collision function' )
+    sep()
+    return( phi ) 
 
 #This function will calculate the abs rate in slab halves        
 def abs_half_cells( abs_array , cep , sep ):
-    '''This function calculates abs rates and probabilities in
-       half-cells'''
-       sep()
-       logging.debug( 'Entering the abs_half_cell function' )
+   '''This function calculates abs rates and probabilities in
+      half-cells'''
+   sep()
+   logging.debug( 'Entering the abs_half_cell function' )
 #Array index of right end of left half of cell
-       h_index = len( abs_array ) / 2 - 1
-       logging.debug( 'Index of right end of left cell:' \
-        + str( h_index ) )
+   h_index = len( abs_array ) / 2 - 1
+   logging.debug( 'Index of right end of left cell:' \
+    + str( h_index ) )
 #Initilize the array
-       abs_report = np.zeros( 1 , 1 )
-       total_abs = float( sum( abs_array ) )
-       abs_report[ 0 , 0 ] = total_abs - sum( abs_array , \
-        h_index + 1 )
-       abs_report[ 0 , 1 ] = sum( abs_array , h_index + 1 )
-       logging.debug( 'Absorption half cell array: ' )
-       logging.debug( str( abs_report[ 0 ] )
-       logging.debug( 'Total absorption is: ' + \
-        str( total_abs ) )
-       abs_report[ 1 ] = abs_report[ 0 ] / total_abs
-       logging.debug( 'Abs probability half cell array:' )
-       logging.debug( str( abs_report[ 1 ] )
-       logging.debug( 'Leaving the abs_half_cell function' )
-       sep()
-       return( abs_report )
+   abs_report = np.zeros( 1 , 1 )
+   total_abs = float( sum( abs_array ) )
+   abs_report[ 0 , 0 ] = total_abs - sum( abs_array , \
+    h_index + 1 )
+   abs_report[ 0 , 1 ] = sum( abs_array , h_index + 1 )
+   logging.debug( 'Absorption half cell array: ' )
+   logging.debug( str( abs_report[ 0 ] ) )
+   logging.debug( 'Total absorption is: ' + \
+       str( total_abs ) )
+   abs_report[ 1 ] = abs_report[ 0 ] / total_abs
+   logging.debug( 'Abs probability half cell array:' )
+   logging.debug( str( abs_report[ 1 ] ) )
+   logging.debug( 'Leaving the abs_half_cell function' )
+   sep()
+   return( abs_report )
 
 #This function will calculate our leakage prob
 def currents( l_array , num_part ):
     '''This function will produce leakage prob'''
     sep()
-    logging.debug( 'Entering the currents function'''
+    logging.debug( 'Entering the currents function' )
 #Generate leakage probabilities
     cur_report = l_array / float( num_part )
     logging.debug( 'Leaving the currents function' )
     sep()
     return( cur_report )
+	
 #This function will plot our flux
 def plotter( flux , num_part , num_bins , width , cep , sep ):
     '''This function will plot our flux'''
@@ -387,7 +388,7 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
     phi = [ x for pair in zip( flux[ 0 ] , flux[ 0 ] ) for x in pair ]
     label_string = 'N = ' + str( num_part )
     save_string = 'P3Plot' + str( num_part )
-    plot( bins , phi , label = label_string
+    plot( bins , phi , label = label_string )
     xlabel( 'Position in cm' )
     ylabel( 'Normalized Flux (#/s*cm*cm)' )
     title( 'Scalar Flux Distribution' )
@@ -402,7 +403,29 @@ for i in range( N ):
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
                     location , new_angle , cep , sep )
+#Now we generate the flux
+Phi = flux_collision( collisions , absorptions , N , cell_length, \
+                        h , sig_array, cep , sep )
 
+#Now we plot the flux
+plotter( Phi , N , h , cell_length , cep , sep )
+
+#Now we generate the absorption information
+abs_out = abs_half_cells( absorptions , cep , sep )
+
+#Now we generate our leakage probabilities
+leak_prob = currents( leak_array , N )
+
+#We also print to the log file
+
+sep()
+logging.debug( 'The number of particles used is: ' + str( N ) )
+cep()
+logging.debug( 'The abs rate is: ' + str( abs_out[ 0 ] ) )
+logging.debug( 'The abs prob is: ' + str( abs_out[ 1 ] ) )
+cep()
+logging.debug( 'The leakage rate is: ' + str( leak_array ) )
+logging.debug( 'The leak prob is: ' + str( leak_prob ) )
 
 # Let the user know it has all ended
 print "Sn CODE END!!"
