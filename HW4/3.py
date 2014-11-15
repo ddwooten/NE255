@@ -30,7 +30,7 @@ print "Pi Approximation CODE BEGIN!"
 N = int( raw_input('Please input the number of samples\n') )
 
 #Define the number of spatial bins
-h = 100
+h = 10
 
 #Define cell length
 cell_length = 8.0 / float( h )
@@ -126,7 +126,8 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs_array , \
         logging.debug( 'Colliding neutron if alive:' )
         logging.debug( 'Parameters before collision: ' )
         logging.debug( 'Incoming angle is: ' + str( mu ) )
-        if alive: alive = collide( pos , mu , col_counter, abs_counter , \
+        if alive and inside: alive = collide( pos , mu , col_counter, \
+           abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
            , new_angle , cep , sep )
         cep()
@@ -315,28 +316,56 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
     sep()
     logging.debug( 'Entering the flux_collision function' )
 #Define total interaction array
+    cep()
+    logging.debug( 'Interactions array: ' )
     interactions = col_array + abs_array
+    logging.debug( str( interactions ) )
 #Initialize the phi array
-    phi = np.zeros( ( 1 , num_bins ) )
+    phi = np.zeros( ( 2 , num_bins ) )
 #Calculate collision flux
+    cep()
+    logging.debug( 'First phi array: ' )
     phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
         float( cell_width ) * float( num_part ) )
+    logging.debug( str( phi[ 0 ] ) )
 #Store non-normalized flux
     nn_phi = phi[ 0 ]
 #Normalize collision flux
+    cep()
+    logging.debug( 'Normalized phi array' )
     phi[ 0 ] = phi[ 0 ] / sum( phi[ 0 ] )
+    logging.debug( str( phi[ 0 ] ) )
 #Calculate estimated mean
+    cep()
+    logging.debug( 'est mean array: ' )
     est_mean = ( interactions ) / float( num_part )
+    logging.debug( str( est_mean ) )
+#We pull sig_t out of the array (causing problems with np)
+    Tsig = xs_array[ 0 ]
+    cep()
+    logging.debug( 'Tsig: ' + str( Tsig ) )
+    logging.debug( str( float( num_part ) ) )
+    logging.debug( str( float( cell_width ) ) )
+
 #Calculate phi error
-    phi[ 1 ] = np.sqrt( ( np.square( interactions - est_mean ) / \
-        ( float( num_part - 1 ) ) ) / ( xs_array[ 0 ] * \
-            float( cell_width ) * float( num_part ) ) )
+    phi[ 1 ] = np.sqrt( ( np.square( interactions - est_mean ) ) / \
+        ( float( num_part - 1 ) * float( num_part ) \
+         * ( float ( Tsig ) * float( cell_width ) * float( num_part ) ) ) )
+    cep()
+    logging.debug( str( ( float( num_part - 1 ) * float( num_part ) \
+         * ( float ( Tsig ) * float( cell_width ) * float( num_part ) ) ) ) )
+    logging.debug( 'First phi error array: ' )
+    logging.debug( str( phi[ 1 ] ) )
 #Store error associated with the sum of the nn_phi array
     sum_error = math.sqrt( sum( np.square( phi[ 1 ] ) ) )
 #Calculate the normalized flux error
     phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / sum( nn_phi ) ) \
         + ( np.square( nn_phi ) / ( sum( nn_phi )**2 ) ) * \
         sum_error )
+    cep()
+    logging.debug( 'Normalized phi error array: ' )
+    logging.debug( str( phi[ 1 ] ) )
+    cep()
     logging.debug( 'Leaving the flux_collision function' )
     sep()
     return( phi ) 
@@ -352,7 +381,7 @@ def abs_half_cells( abs_array , cep , sep ):
    logging.debug( 'Index of right end of left cell:' \
     + str( h_index ) )
 #Initilize the array
-   abs_report = np.zeros( ( 1 , 1 ) )
+   abs_report = np.zeros( ( 2 , 2 ) )
    total_abs = float( sum( abs_array ) )
    abs_report[ 0 , 0 ] = total_abs - sum( abs_array , \
     h_index + 1 )
@@ -384,14 +413,26 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
     '''This function will plot our flux'''
     sep()
     logging.debug( 'Entering plotting function' )
-    bins = [ x * width for x in range( num_bins ) ]
+    logging.debug( 'First bins' )
+    bins = [ x * width for x in range( num_bins + 1 ) ]
+    logging.debug( str( bins ) )
+    cep()
+    logging.debug( 'Second bins' )
+    bins = [ x for pair in zip( bins , bins ) for x in pair][1:-1]
+    logging.debug( str( bins ) )
+    cep()
+    logging.debug( 'Phi' )
+    cep()
     phi = [ x for pair in zip( flux[ 0 ] , flux[ 0 ] ) for x in pair ]
+    logging.debug( str( phi ) )
+    logging.debug( str( len( phi ) ) )
+    logging.debug( str( len( bins ) ) )
     label_string = 'N = ' + str( num_part )
     save_string = 'P3Plot' + str( num_part )
-    plot( bins , phi , label = label_string )
-    xlabel( 'Position in cm' )
-    ylabel( 'Normalized Flux (#/s*cm*cm)' )
-    title( 'Scalar Flux Distribution' )
+    pl.plot( bins , phi , label = label_string )
+    pl.xlabel( 'Position in cm' )
+    pl.ylabel( 'Normalized Flux (#/s*cm*cm)' )
+    pl.title( 'Scalar Flux Distribution' )
     savefig( save_string )
     logging.debug( 'Leaving the plotting function' )
     sep()
