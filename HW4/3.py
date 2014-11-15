@@ -317,7 +317,7 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
 #Define total interaction array
     interactions = col_array + abs_array
 #Initialize the phi array
-    phi = np.zeros[ 1 , num_bins ]
+    phi = np.zeros[ ( 1 , num_bins ) ]
 #Calculate collision flux
     phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
         float( cell_width ) * float( num_part ) )
