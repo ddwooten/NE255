@@ -7,6 +7,7 @@ import time as time
 import sys as sys
 import numpy as np
 import math as math
+import pylab as pl
 
 # Function, refer to docstring for purpose
 def cep():
@@ -377,6 +378,23 @@ def currents( l_array , num_part ):
     logging.debug( 'Leaving the currents function' )
     sep()
     return( cur_report )
+#This function will plot our flux
+def plotter( flux , num_part , num_bins , width , cep , sep ):
+    '''This function will plot our flux'''
+    sep()
+    logging.debug( 'Entering plotting function' )
+    bins = [ x * width for x in range( num_bins ) ]
+    phi = [ x for pair in zip( flux[ 0 ] , flux[ 0 ] ) for x in pair ]
+    label_string = 'N = ' + str( num_part )
+    save_string = 'P3Plot' + str( num_part )
+    plot( bins , phi , label = label_string
+    xlabel( 'Position in cm' )
+    ylabel( 'Normalized Flux (#/s*cm*cm)' )
+    title( 'Scalar Flux Distribution' )
+    savefig( save_string )
+    logging.debug( 'Leaving the plotting function' )
+    sep()
+    return 
 
 #Lets begin our neutron histories loop
 for i in range( N ):
