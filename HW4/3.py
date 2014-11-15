@@ -320,12 +320,22 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
 #Calculate collision flux
         phi[ 0 ] = ( interactions ) / ( xs_array[ 0 ] * \
             float( cell_width ) * float( num_part ) )
+#Store non-normalized flux
+        nn_phi = phi[ 0 ]
+#Normalize collision flux
+        phi[ 0 ] = phi[ 0 ] / sum( phi[ 0 ] )
 #Calculate estimated mean
         est_mean = ( interactions ) / float( num_part )
 #Calculate phi error
-        phi[ 1 ] = ( np.square( interactions - est_mean ) / \
+        phi[ 1 ] = np.sqrt( ( np.square( interactions - est_mean ) / \
             ( float( num_part - 1 ) ) ) / ( xs_array[ 0 ] * \
-                float( cell_width ) * float( num_part ) )
+                float( cell_width ) * float( num_part ) ) )
+#Store error associated with the sum of the nn_phi array
+        sum_error = math.sqrt( sum( np.square( phi[ 1 ] ) ) )
+#Calculate the normalized flux error
+        phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / sum( nn_phi ) ) \
+            + ( np.square( nn_phi ) / ( sum( nn_phi )**2 ) ) * \
+            sum_error )
         return( phi ) 
 
 #This function will calculate the abs rate in slab halves        
