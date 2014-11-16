@@ -356,9 +356,9 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
 #Store error associated with the sum of the nn_phi array
     sum_error = math.sqrt( sum( np.square( phi[ 1 ] ) ) )
 #Calculate the normalized flux error
-    phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / sum( nn_phi ) ) \
+    phi[ 1 ] = np.sqrt( ( np.square( phi[ 1 ] ) / np.square( sum( nn_phi ) ) ) \
         + ( np.square( nn_phi ) / ( sum( nn_phi )**2 ) ) * \
-        sum_error )
+        sum_error**2 )
     cep()
     logging.debug( 'Normalized phi error array: ' )
     logging.debug( str( phi[ 1 ] ) )
@@ -406,13 +406,11 @@ def abs_half_cells( abs_array , num_part , cep , sep ):
    abs_report[ 1 , 0 ] = abs_e_l
    abs_report[ 1 , 1 ] = abs_e_r
 #Get abs prob
-   abs_report[ 2 ] = abs_report[ 0 ] / total_abs
+   abs_report[ 2 ] = abs_report[ 0 ] / float( num_part )
    logging.debug( 'Abs probability half cell array:' )
    logging.debug( str( abs_report[ 1 ] ) )
 #Store error for prob
-   abs_report[ 3 ] = np.sqrt( np.square( abs_report[ 1 ] ) / \
-    total_abs**2 + np.square( abs_report[ 0 ] ) / \
-    total_abs**4 * abs_s_e**2 )
+   abs_report[ 3 ] = abs_report[ 1 ] / float( num_part )
    logging.debug( 'Leaving the abs_half_cell function' )
    sep()
    return( abs_report )
