@@ -344,9 +344,6 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
     Tsig = xs_array[ 0 ]
     cep()
     logging.debug( 'Tsig: ' + str( Tsig ) )
-    logging.debug( str( float( num_part ) ) )
-    logging.debug( str( float( cell_width ) ) )
-
 #Calculate phi error
     phi[ 1 ] = np.sqrt( ( np.square( interactions - est_mean ) ) / \
         ( float( num_part - 1 ) * float( num_part ) \
@@ -414,26 +411,32 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
     sep()
     logging.debug( 'Entering plotting function' )
     logging.debug( 'First bins' )
-    bins = [ x * width for x in range( num_bins + 1 ) ]
-    logging.debug( str( bins ) )
+    points = [ x * width for x in range( num_bins + 1 ) ]
+    logging.debug( str( points ) )
     cep()
     logging.debug( 'Second bins' )
-    bins = [ x for pair in zip( bins , bins ) for x in pair][1:-1]
+    bins = [ x for pair in zip( points , points ) for x in pair][1:-1]
     logging.debug( str( bins ) )
+    mid_points = points[ 0 : len( points ) - 1 ] 
+    mid_points = [ x + ( width / 2.0 ) for x in mid_points ]
+    cep()
+    logging.debug( 'mid_points array: ' )
+    logging.debug( str( mid_points ) )
     cep()
     logging.debug( 'Phi' )
     cep()
     phi = [ x for pair in zip( flux[ 0 ] , flux[ 0 ] ) for x in pair ]
+    phi_err = flux[ 1 ]
     logging.debug( str( phi ) )
-    logging.debug( str( len( phi ) ) )
-    logging.debug( str( len( bins ) ) )
+    logging.debug( str( len( mid_points ) ) )
+    logging.debug( str( len( phi_err ) ) )
     label_string = 'N = ' + str( num_part )
     save_string = 'P3Plot' + str( num_part )
-    pl.plot( bins , phi , label = label_string )
+    pl.plot( bins , phi , label = label_string , mid_points , phi_err )
     pl.xlabel( 'Position in cm' )
     pl.ylabel( 'Normalized Flux (#/s*cm*cm)' )
     pl.title( 'Scalar Flux Distribution' )
-    savefig( save_string )
+    pl.savefig( save_string )
     logging.debug( 'Leaving the plotting function' )
     sep()
     return 
