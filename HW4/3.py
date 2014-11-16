@@ -368,7 +368,7 @@ def flux_collision( col_array , abs_array , num_part , cell_width, \
     return( phi ) 
 
 #This function will calculate the abs rate in slab halves        
-def abs_half_cells( abs_array , cep , sep ):
+def abs_half_cells( abs_array , num_part , cep , sep ):
    '''This function calculates abs rates and probabilities in
       half-cells'''
    sep()
@@ -378,18 +378,42 @@ def abs_half_cells( abs_array , cep , sep ):
    logging.debug( 'Index of right end of left cell:' \
     + str( h_index ) )
 #Initilize the array
-   abs_report = np.zeros( ( 2 , 2 ) )
+   abs_report = np.zeros( ( 4 , 2 ) )
+#Get total absoprtions
    total_abs = float( sum( abs_array ) )
+#Get abs, per cell, estimated mean
+   abs_m = abs_array / float( num_part )
+#Get abs var
+   abs_v = ( abs_array - abs_m )**2 / ( \
+    float( num_part + 1 ) * float( num_part ) )
+#Get abs s.error
+   abs_e = np.sqrt( abs_v )
+#Get error of left half sum
+   abs_e_l = math.sqrt( sum( abs_v[ 0 : h_index ] ) )
+#Get error of right half sum
+   abs_e_r = math.sqrt( sum( abs_v[ h_index + 1 : ] ) )
+#Get error of total sum
+   abs_s_e = math.sqrt( sum( abs_v ) )
+#Get abs rate in left half
    abs_report[ 0 , 0 ] = total_abs - sum( abs_array , \
     h_index + 1 )
+#Get abs rate in right half
    abs_report[ 0 , 1 ] = sum( abs_array , h_index + 1 )
    logging.debug( 'Absorption half cell array: ' )
    logging.debug( str( abs_report[ 0 ] ) )
    logging.debug( 'Total absorption is: ' + \
        str( total_abs ) )
-   abs_report[ 1 ] = abs_report[ 0 ] / total_abs
+#Store error
+   abs_report[ 1 , 0 ] = abs_e_l
+   abs_report[ 1 , 1 ] = abs_e_r
+#Get abs prob
+   abs_report[ 3 ] = abs_report[ 0 ] / total_abs
    logging.debug( 'Abs probability half cell array:' )
    logging.debug( str( abs_report[ 1 ] ) )
+#Store error for prob
+   abs_report[ 4 ] = np.sqrt( np.square( abs_report[ 1 ] ) / \
+    total_abs**2 + np.square( abs_report[ 0 ] ) / \
+    total_abs**4 * abs_s_e**2 )
    logging.debug( 'Leaving the abs_half_cell function' )
    sep()
    return( abs_report )
@@ -399,8 +423,15 @@ def currents( l_array , num_part ):
     '''This function will produce leakage prob'''
     sep()
     logging.debug( 'Entering the currents function' )
+#Init array
+    cur_report = np.zeros( ( 3 , 1 ) )
+#Calc leak error
+    cur_report = np.sqrt( np.square( l_array - l_array / \
+        float( num_part ) ) / ( float( num_part - 1 ) ) )
 #Generate leakage probabilities
-    cur_report = l_array / float( num_part )
+    cur_report[ 1 ] = l_array / float( num_part )
+#Gen leak prob error
+    cur_report[ 2 ] = cur_report[ 0 ] / float( num_part )
     logging.debug( 'Leaving the currents function' )
     sep()
     return( cur_report )
