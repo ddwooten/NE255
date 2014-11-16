@@ -24,7 +24,7 @@ def sep():
 
 # Let the user know that the code is running
 print "*****************************************************"
-print "Pi Approximation CODE BEGIN!"
+print "Slab Flux CODE BEGIN!"
 
 #Take in the number of samples
 N = int( raw_input('Please input the number of samples\n') )
@@ -432,7 +432,10 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
     logging.debug( str( len( phi_err ) ) )
     label_string = 'N = ' + str( num_part )
     save_string = 'P3Plot' + str( num_part )
-    pl.plot( bins , phi , label = label_string , mid_points , phi_err )
+    pl.plot( bins , phi , 'b-' , label = label_string )
+    pl.plot( mid_points , flux[ 0 ] , marker = '.' , color = 'b' , \
+         visible = False )
+    pl.errorbar( mid_points , flux[ 0 ] , yerr = phi_err , linestyle = 'None' )
     pl.xlabel( 'Position in cm' )
     pl.ylabel( 'Normalized Flux (#/s*cm*cm)' )
     pl.title( 'Scalar Flux Distribution' )
