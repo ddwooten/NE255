@@ -395,8 +395,7 @@ def abs_half_cells( abs_array , num_part , cep , sep ):
 #Get error of total sum
    abs_s_e = math.sqrt( sum( abs_v ) )
 #Get abs rate in left half
-   abs_report[ 0 , 0 ] = total_abs - sum( abs_array , \
-    h_index + 1 )
+   abs_report[ 0 , 0 ] = sum( abs_array[ 0 : h_index ] )
 #Get abs rate in right half
    abs_report[ 0 , 1 ] = sum( abs_array , h_index + 1 )
    logging.debug( 'Absorption half cell array: ' )
@@ -407,11 +406,11 @@ def abs_half_cells( abs_array , num_part , cep , sep ):
    abs_report[ 1 , 0 ] = abs_e_l
    abs_report[ 1 , 1 ] = abs_e_r
 #Get abs prob
-   abs_report[ 3 ] = abs_report[ 0 ] / total_abs
+   abs_report[ 2 ] = abs_report[ 0 ] / total_abs
    logging.debug( 'Abs probability half cell array:' )
    logging.debug( str( abs_report[ 1 ] ) )
 #Store error for prob
-   abs_report[ 4 ] = np.sqrt( np.square( abs_report[ 1 ] ) / \
+   abs_report[ 3 ] = np.sqrt( np.square( abs_report[ 1 ] ) / \
     total_abs**2 + np.square( abs_report[ 0 ] ) / \
     total_abs**4 * abs_s_e**2 )
    logging.debug( 'Leaving the abs_half_cell function' )
@@ -424,12 +423,13 @@ def currents( l_array , num_part ):
     sep()
     logging.debug( 'Entering the currents function' )
 #Init array
-    cur_report = np.zeros( ( 3 , 1 ) )
+    cur_report = np.zeros( ( 3 , 2 ) )
 #Calc leak error
-    cur_report = np.sqrt( np.square( l_array - l_array / \
+    cur_report[ 0 ] = np.sqrt( np.square( l_array - l_array / \
         float( num_part ) ) / ( float( num_part - 1 ) ) )
 #Generate leakage probabilities
-    cur_report[ 1 ] = l_array / float( num_part )
+    cur_report[ 1 , 0 ] = l_array[ 0 ] / float( num_part )
+    cur_report[ 1 , 1 ] = l_array[ 1 ] / float( num_part )
 #Gen leak prob error
     cur_report[ 2 ] = cur_report[ 0 ] / float( num_part )
     logging.debug( 'Leaving the currents function' )
@@ -489,7 +489,7 @@ Phi = flux_collision( collisions , absorptions , N , cell_length, \
 plotter( Phi , N , h , cell_length , cep , sep )
 
 #Now we generate the absorption information
-abs_out = abs_half_cells( absorptions , cep , sep )
+abs_out = abs_half_cells( absorptions , N , cep , sep )
 
 #Now we generate our leakage probabilities
 leak_prob = currents( leak_array , N )
@@ -500,10 +500,14 @@ sep()
 logging.debug( 'The number of particles used is: ' + str( N ) )
 cep()
 logging.debug( 'The abs rate is: ' + str( abs_out[ 0 ] ) )
-logging.debug( 'The abs prob is: ' + str( abs_out[ 1 ] ) )
+logging.debug( 'The abs rate error is: ' + str( abs_out[ 1 ] ) )
+logging.debug( 'The abs prob is: ' + str( abs_out[ 2 ] ) )
+logging.debug( 'The abs prob error is: ' + str( abs_out[ 3 ] ) )
 cep()
 logging.debug( 'The leakage rate is: ' + str( leak_array ) )
-logging.debug( 'The leak prob is: ' + str( leak_prob ) )
+logging.debug( 'The error in leak rate is: ' + str( leak_prob[ 0 ] ) )
+logging.debug( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
+logging.debug( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
 
 # Let the user know it has all ended
 print "Sn CODE END!!"
