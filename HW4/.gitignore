@@ -7,3 +7,6 @@
 *.error
 *.out
 *.swp
+*.png
+*.tiff
+*.tif
