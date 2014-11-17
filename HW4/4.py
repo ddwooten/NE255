@@ -127,12 +127,14 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         cep()
         logging.debug( 'Projected distance is: ' + str( dis * mu ) )
 #Project onto the x axis
+        old_pos = pos
         pos = pos + dis * mu
         cep()
         logging.debug( 'New position is: ' + str( pos ) )
 #Check for scoring albedo
-        if num_col < 2:
-            count = score( num_col , mu , pos , eng , cep , sep )
+        if num_col = 1:
+            count = score( mu , pos , eng , \
+                 count, old_pos ,  cep , sep )
 #Check for leakage
         cep()
         logging.debug( 'Checking for leakage' )
@@ -160,6 +162,17 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
     logging.debug( 'Terminating neutron history' )
     sep()
     return( count )
+
+#This function will score our albedo
+def score(  angle , place , energy , alb , old_place , cep , sep ):
+    '''This function will score our albedo'''
+    sep()
+    logging.debug( 'Entering the score function' )
+    if angle < 0 and place >= abs( old_place / angle ):
+       mark = True 
+    logging.debug( 'Leaving the score function' )
+    sep()
+    return( mark )
 
 #This function will determine photon cross sections
 def xs( data , energy , cep , sep ):
@@ -238,6 +251,7 @@ def xs( data , energy , cep , sep ):
     logging.debug( 'Leaving the xs function' )
     sep()
     return( cs_array )
+
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle \
                 , col_type , location , xs , width , new_angle , cep , sep ):
@@ -562,11 +576,14 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
     return 
 
 #Lets begin our neutron histories loop
+albedo = 0
 for i in range( N ):
-     Lifetime( collisions , absorptions , leak_array , xs , \
+     if Lifetime( collisions , absorptions , leak_array , xs , \
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
-                    location , new_angle , att_array , cep , sep )
+                    location , new_angle , att_array , cep , sep ):
+        albedo += albedo
+
 #Now we generate the flux
 Phi = flux_collision( collisions , absorptions , N , cell_length, \
                         h , sig_array, cep , sep )
@@ -594,6 +611,12 @@ logging.debug( 'The leakage rate is: ' + str( leak_array ) )
 logging.debug( 'The error in leak rate is: ' + str( leak_prob[ 0 ] ) )
 logging.debug( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
 logging.debug( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
+cep()
+logging.debug( 'The albedo number is: ' + str( albedo ) )
+logging.debug( 'The albedo ratio is: ' +str( albedo / float( N ) ) )
+albedo_error = math.sqrt( ( albedo - ( albedo / float( N ) ) )**2 \
+    / ( float( N - 1 ) ) )
+logging.debug( 'The albedo ratio error is: ' + str( albedo_error ) )
 
 # Let the user know it has all ended
 print "Sn CODE END!!"
