@@ -150,7 +150,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         if alive and inside: alive = collide( pos , mu , col_counter, \
            abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
-           , new_angle , cep , sep )
+           , new_angle , eng , cep , sep )
         cep()
         logging.debug( 'Neutron parameters post collision: ' )
         logging.debug( 'Outgoing angle is: ' + str( mu ) )
@@ -254,12 +254,13 @@ def xs( data , energy , cep , sep ):
 
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle \
-                , col_type , location , xs , width , new_angle , cep , sep ):
+                , col_type , location , cs , width , new_angle \
+                , energy , cep , sep ):
     '''This function collides neutrons and hanldes the aftermath'''
     sep()
     logging.debug( 'Entering the colision routine' )
 #Determine the type of collision
-    collision = col_type( xs , cep , sep )
+    collision = col_type( cs , cep , sep )
     cep()
     logging.debug( 'Collision of type: ' + str( collision ) )
 #Determine the spatial bin this occured in
@@ -282,9 +283,13 @@ def collide( position , MU , col , absor , existance , angle \
 #Get a new angle post scatter
         cep()
         logging.debug( 'Incoming angle: ' + str( MU ) )
-        MU = new_angle( MU , xs , cep , sep )
+        logging.debug( 'Incoming energy is: ' +str( energy ) )
+        out = new_angle( MU , xs , energy , cep , sep )
+        MU = out[ 0 ]
+        energy = out[ 1 ] 
         cep()
         logging.debug( 'Outgoing angle: ' + str( MU ) ) 
+        logging.debug( 'Outgoing energy is: ' + str( energy ) )
 #If the collision was an abosrption
     else:
 #Tabulate the absorption
@@ -303,8 +308,8 @@ def collide( position , MU , col , absor , existance , angle \
     return( existance )
 
 #This function calculates an outgoing angle post scattering
-def new_angle( incoming , x_sec , cep , sep ):
-    '''This function calculates an outgoing aniso angle'''
+def new_angle( incoming , x_sec , energy , cep , sep ):
+    '''This function calculates an outgoing compton angle and energy'''
     sep()
     logging.debug( 'Entering the new_angle function' )
 #We define the average scattering angle
@@ -361,9 +366,9 @@ def col_type( csx_array , cep , sep ):
 #   cross section to the total, the collision
 #   was an absorption
     logging.debug( 'Threshold for abs is: ' + \
-        str( csx_array[ 3 ] / csx_array[ 0 ] ) )
+        str( csx_array[ 2 ] / csx_array[ 0 ] ) )
     cep()
-    if quanta <= csx_array[ 3 ] / csx_array[ 0 ]:
+    if quanta <= csx_array[ 2 ] / csx_array[ 0 ]:
         col_type = int( 0 )
         logging.debug( 'Collision type is: ' +\
             str( col_type ) )
@@ -600,23 +605,23 @@ leak_prob = currents( leak_array , N )
 #We also print to the log file
 
 sep()
-logging.debug( 'The number of particles used is: ' + str( N ) )
+logging.critical( 'The number of particles used is: ' + str( N ) )
 cep()
-logging.debug( 'The abs rate is: ' + str( abs_out[ 0 ] ) )
-logging.debug( 'The abs rate error is: ' + str( abs_out[ 1 ] ) )
-logging.debug( 'The abs prob is: ' + str( abs_out[ 2 ] ) )
-logging.debug( 'The abs prob error is: ' + str( abs_out[ 3 ] ) )
+logging.critical( 'The abs rate is: ' + str( abs_out[ 0 ] ) )
+logging.critical( 'The abs rate error is: ' + str( abs_out[ 1 ] ) )
+logging.critical( 'The abs prob is: ' + str( abs_out[ 2 ] ) )
+logging.critical( 'The abs prob error is: ' + str( abs_out[ 3 ] ) )
 cep()
-logging.debug( 'The leakage rate is: ' + str( leak_array ) )
-logging.debug( 'The error in leak rate is: ' + str( leak_prob[ 0 ] ) )
-logging.debug( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
-logging.debug( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
+logging.critical( 'The leakage rate is: ' + str( leak_array ) )
+logging.critical( 'The error in leak rate is: ' + str( leak_prob[ 0 ] ) )
+logging.critical( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
+logging.critical( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
 cep()
-logging.debug( 'The albedo number is: ' + str( albedo ) )
-logging.debug( 'The albedo ratio is: ' +str( albedo / float( N ) ) )
+logging.critical( 'The albedo number is: ' + str( albedo ) )
+logging.critical( 'The albedo ratio is: ' +str( albedo / float( N ) ) )
 albedo_error = math.sqrt( ( albedo - ( albedo / float( N ) ) )**2 \
     / ( float( N - 1 ) ) )
-logging.debug( 'The albedo ratio error is: ' + str( albedo_error ) )
+logging.critical( 'The albedo ratio error is: ' + str( albedo_error ) )
 
 # Let the user know it has all ended
 print "Sn CODE END!!"
