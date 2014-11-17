@@ -284,7 +284,7 @@ def collide( position , MU , col , absor , existance , angle \
         cep()
         logging.debug( 'Incoming angle: ' + str( MU ) )
         logging.debug( 'Incoming energy is: ' +str( energy ) )
-        out = new_angle( MU , xs , energy , cep , sep )
+        out = compton( MU , energy , cep , sep )
         MU = out[ 0 ]
         energy = out[ 1 ] 
         cep()
@@ -325,16 +325,16 @@ def new_angle( incoming , x_sec , energy , cep , sep ):
     return( new_mu )
 
 #This function will sample the photon energy in compton scattering
-def compton( energy , cep , sep ):
+def compton( old_angle , energy , cep , sep ):
     '''This function samples the compton scattering energy for a photon'''
     sep()
     logging.debug( 'Entering the compton function' )
 #Init our out array
     out = np.zeros( 2 )
 #Define some constants
-    plank = mpf( 6.626 * 10**( -34 ) )
-    light = mpf( 3.0 * 10**( 8 ) )
-    mass = mpf( 9.109 * 10**( -31 ) )
+    #plank = mpf( 6.626 * 10**( -34 ) )
+    #light = mpf( 3.0 * 10**( 8 ) )
+    #mass = mpf( 9.109 * 10**( -31 ) )
 #Get our lambda ( may need adjusting )
     #lam = ( mass * light**2 ) / ( energy / plank )
     lam = 0.511 / energy
@@ -358,7 +358,8 @@ def compton( energy , cep , sep ):
     logging.debug( 'Old energy: ' + str( energy ) )
     logging.debug( 'New energy: ' + str( out[ 1 ] )
 #Generate and store outgoing angle
-    out[ 0 ] = 1.0 - lam * ( x1 - 1.0 )
+    out[ 0 ] = math.cos( math.acos( old_angle ) + \
+        math.acos( 1.0 - lam * ( x1 - 1.0 ) ) )
     logging.debug( 'Old angle: ' + str( angle ) )
     logging.debug( 'New angle: ' + str( out[ 0 ] ) )
     logging.debug( 'Leaving the compton function' )
