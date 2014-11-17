@@ -169,7 +169,7 @@ def score(  angle , place , energy , alb , old_place , cep , sep ):
     sep()
     logging.debug( 'Entering the score function' )
     if angle < 0 and place >= abs( old_place / angle ):
-       mark = True 
+       mark = energy * angle
     logging.debug( 'Leaving the score function' )
     sep()
     return( mark )
@@ -336,9 +336,11 @@ def compton( energy , cep , sep ):
     light = mpf( 3.0 * 10**( 8 ) )
     mass = mpf( 9.109 * 10**( -31 ) )
 #Get our lambda ( may need adjusting )
-    lam = ( mass * light**2 ) / ( energy / plank )
-    logging.debug( 'Lambda is: ' + mp.nstr( lam , n = 10 ) )
-    lam = float( mp.nstr( lam , n = 10 ) )
+    #lam = ( mass * light**2 ) / ( energy / plank )
+    lam = 0.511 / energy
+    #logging.debug( 'Lambda is: ' + mp.nstr( lam , n = 10 ) )
+    logging.debug( 'Lambda is: ' + str( lam ) )
+    #lam = float( mp.nstr( lam , n = 10 ) )
 #Enter the x selection algorithm
     while out[ 1 ] == 0 :
 #Generate our three random numbers
@@ -346,19 +348,22 @@ def compton( energy , cep , sep ):
         if nums[ 0 ] <= ( ( lam + 2.0 ) / ( 9.0 * lam + 2.0 ) ):
             x1 = 1.0 + 2.0 * nums[ 1 ] / lam
             if nums[ 2 ] <= 4.0 * ( 1.0 / x1 - 1.0 / x1**2 ):
-                out[ 1 ] = **********************
+                out[ 1 ] = 0.511 / ( x1 * lam )
         else:
             x1 = ( lam + 2.0 ) / ( lam + 2.0 * nums[ 1 ] )
             if nums[ 2 ] <= 0.5 * ( ( lam - lam * x1 + 1.0 )**2 \
                + 1.0 / x1 ):
-               out[ 1 ] = ************************** 
+               out[ 1 ] = 0.511 / ( x1 * lam ) 
     cep()
     logging.debug( 'Old energy: ' + str( energy ) )
     logging.debug( 'New energy: ' + str( out[ 1 ] )
+#Generate and store outgoing angle
+    out[ 0 ] = 1.0 - lam * ( x1 - 1.0 )
+    logging.debug( 'Old angle: ' + str( angle ) )
+    logging.debug( 'New angle: ' + str( out[ 0 ] ) )
     logging.debug( 'Leaving the compton function' )
     sep()
     return( out )
-#
 
 #This function determines in which spatial bin an interaction occurs
 def location( place , bin_width , cep , sep ):
@@ -619,11 +624,10 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
 #Lets begin our neutron histories loop
 albedo = 0
 for i in range( N ):
-     if Lifetime( collisions , absorptions , leak_array , xs , \
+     albedo += Lifetime( collisions , absorptions , leak_array , xs , \
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
-                    location , new_angle , att_array , cep , sep ):
-        albedo += albedo
+                    location , new_angle , att_array , cep , sep )
 
 #Now we generate the flux
 Phi = flux_collision( collisions , absorptions , N , cell_length, \
@@ -654,8 +658,8 @@ logging.critical( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
 logging.critical( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
 cep()
 logging.critical( 'The albedo number is: ' + str( albedo ) )
-logging.critical( 'The albedo ratio is: ' +str( albedo / float( N ) ) )
-albedo_error = math.sqrt( ( albedo - ( albedo / float( N ) ) )**2 \
+logging.critical( 'The albedo ratio is: ' +str( albedo * 0.5  / float( N ) ) )
+albedo_error = math.sqrt( ( albedo - ( albedo * 0.5 / float( N ) ) )**2 \
     / ( float( N - 1 ) ) )
 logging.critical( 'The albedo ratio error is: ' + str( albedo_error ) )
 
