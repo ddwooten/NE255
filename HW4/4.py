@@ -324,6 +324,42 @@ def new_angle( incoming , x_sec , energy , cep , sep ):
     sep()
     return( new_mu )
 
+#This function will sample the photon energy in compton scattering
+def compton( energy , cep , sep ):
+    '''This function samples the compton scattering energy for a photon'''
+    sep()
+    logging.debug( 'Entering the compton function' )
+#Init our out array
+    out = np.zeros( 2 )
+#Define some constants
+    plank = mpf( 6.626 * 10**( -34 ) )
+    light = mpf( 3.0 * 10**( 8 ) )
+    mass = mpf( 9.109 * 10**( -31 ) )
+#Get our lambda ( may need adjusting )
+    lam = ( mass * light**2 ) / ( energy / plank )
+    logging.debug( 'Lambda is: ' + mp.nstr( lam , n = 10 ) )
+    lam = float( mp.nstr( lam , n = 10 ) )
+#Enter the x selection algorithm
+    while out[ 1 ] == 0 :
+#Generate our three random numbers
+        nums = np.random.random( 3 )
+        if nums[ 0 ] <= ( ( lam + 2.0 ) / ( 9.0 * lam + 2.0 ) ):
+            x1 = 1.0 + 2.0 * nums[ 1 ] / lam
+            if nums[ 2 ] <= 4.0 * ( 1.0 / x1 - 1.0 / x1**2 ):
+                out[ 1 ] = **********************
+        else:
+            x1 = ( lam + 2.0 ) / ( lam + 2.0 * nums[ 1 ] )
+            if nums[ 2 ] <= 0.5 * ( ( lam - lam * x1 + 1.0 )**2 \
+               + 1.0 / x1 ):
+               out[ 1 ] = ************************** 
+    cep()
+    logging.debug( 'Old energy: ' + str( energy ) )
+    logging.debug( 'New energy: ' + str( out[ 1 ] )
+    logging.debug( 'Leaving the compton function' )
+    sep()
+    return( out )
+#
+
 #This function determines in which spatial bin an interaction occurs
 def location( place , bin_width , cep , sep ):
     '''This function determines in which bin an interaction occurs'''
