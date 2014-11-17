@@ -9,6 +9,10 @@ import numpy as np
 import math as math
 import pylab as pl
 import csv as csvreader
+import mpmath as mp
+
+#This sets the precision for mpmath (extended precision python)
+mp.dis = 70
 
 # Function, refer to docstring for purpose
 def cep():
@@ -36,16 +40,14 @@ reader = csvreader.reader( csvfile )
 array = []
 for row in reader:
     array.append( row )
-sig_array = np.zeros( ( len( array ) , 3 ) )
+att_array = np.zeros( ( len( array ) , 3 ) )
 for row in range( len( array ) ):
     for column in range( len( array[ row ] ) ):
-        sig_array[ row ][ column ] = float( array[ row ][ column ] )
+        att_array[ row ][ column ] = float( array[ row ][ column ] )
 
 #Define the number of spatial bins
 h = 10
 
-#Here we define the concreate density
-rho = 2.3
 
 #Define cell length
 cell_length = 5.0 / float( h )
@@ -79,14 +81,14 @@ if LogLevel <= 10:
     sep()
     logging.debug( 'The cross sections array is: ' )
     cep()
-    for row in range( len( sig_array ) ):
-        logging.debug( str( sig_array[ row ] ) )
+    for row in range( len( att_array ) ):
+        logging.debug( str( att_array[ row ] ) )
 
 #This function will follow the lifespan of one neutron
 def Lifetime( col_counter , abs_counter , leak_counter , xs , \
                 cell_width , start_pos , angle , \
                 distance , leakage , collide , col_type , \
-                location , new_angle , cep , sep ):
+                location , new_angle , xs_data , cep , sep ):
     '''This function caries a neutron through its lifespan'''
     sep()
     logging.debug( 'Starting new neutron history' )
@@ -98,13 +100,16 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
     inside = True
     cep()
     logging.debug( 'Neutron is inside: ' + str( inside ) )
-#Start the neutron off with a position and an angle 
+#Start the neutron off with a position and an angle and energy
     pos = start_pos( cep , sep )
     cep()
     logging.debug( 'Neutron is starting at: ' + str( pos ) )
     mu = angle( cep , sep )
     cep()
     logging.debug( 'Neutron has angle: ' + str( mu ) )
+    eng = 2.0
+    cep()
+    logging.debug( 'Neutron has energy: ' + str( eng ) )
 #Counter for number of loops
     num_col = 0
 #Here we begin the tracking loop
@@ -112,8 +117,10 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
     while ( inside and alive ):
         cep()
         logging.debug( 'Tracking collision number: ' + str( num_col ) )
+#Determine the photon cross sections
+        xs_array = xs( xs_data , eng , cep , sep )
 #Get the total distance traveled
-        dis = distance( xs ,  cep , sep )
+        dis = distance( xs_array[ 0 ] ,  cep , sep )
         cep()
         logging.debug( 'Neutron is traveling distance: ' + \
             str( dis ) )
@@ -123,6 +130,9 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         pos = pos + dis * mu
         cep()
         logging.debug( 'New position is: ' + str( pos ) )
+#Check for scoring albedo
+        if num_col < 2:
+            count = score( num_col , mu , pos , eng , cep , sep )
 #Check for leakage
         cep()
         logging.debug( 'Checking for leakage' )
@@ -134,6 +144,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         logging.debug( 'Colliding neutron if alive:' )
         logging.debug( 'Parameters before collision: ' )
         logging.debug( 'Incoming angle is: ' + str( mu ) )
+        logging.debug( 'Incoming energy is: ' + str( eng ) )
         if alive and inside: alive = collide( pos , mu , col_counter, \
            abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
@@ -148,8 +159,85 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         num_col += 1
     logging.debug( 'Terminating neutron history' )
     sep()
-    return()
+    return( count )
 
+#This function will determine photon cross sections
+def xs( data , energy , cep , sep ):
+    '''This function will determine photon cross sections'''
+    sep()
+    logging.debug( 'Entering the xs function' )
+#Init the storage array
+    cs_array = np.zeros( 3 )
+#Here we define the concreate density
+    rho = 2.3
+#Here we define a rough electron density
+    e_den = mpf( 3 * 10^( 23 ) * 100**3 )
+#Here we define the speed of light, planks const, and electron mass
+    plank = mpf( 6.626 * 10**( -34 ) )
+    qo = mpf( 1.602 * 10**( -19 ) )
+    light = mpf( 3.0 * 10**( 8 ) )
+    mass = mpf( 9.109 * 10**( -31 ) )
+#Set the energy as an extended precision number
+    eng = mpmathify( energy )
+#Get the frequency
+    v = eng / plank
+#Here we calculate the compton cross section
+    radius = qo**4 / ( mass * light**2 )
+    alpha = plank * v / ( mass * light**2 )
+    cs_xs = 2 * mp.pi * radius * ( ( ( 1.0 + alpha ) \
+        / ( alpha**2 ) ) * ( ( ( 2.0 * ( 1.0 + alpha ) \
+        ) / ( 1.0 + 2.0 * alpha ) ) - ( 1.0 / alpha ) * \
+        ( mp.log( 1.0 + 2.0 * alpha ) ) ) + ( ( 1.0 / \
+        ( 2.0 * alpha ) ) * mp.log( 1.0 + 2.0 * alpha ) - \
+        ( ( 1.0 + 3.0 * alpha ) / ( 1.0 + 2.0 * alpha )**2 ) ) )
+    cep()
+    logging.debug( 'The micro cs xs is: ' + mp.nstr( \
+        cs_xs , n = 10 ) )
+    mu_cs = cs_xs * e_den
+    logging.debug( 'The macro cs xs is: ' + mp.nstr( \
+        mu_cs , n = 10 ) )
+    cs_array[ 1 ] = float( mp.nstr( mu_cs , n = 10 ) )
+#Now we will determine, via linear interp, the total xs
+    cep()
+    logging.debug( 'Energy of photon is: ' + str( energy ) )
+    if energy <= data[ 0 , 0 ]:
+        logging.debug( 'Lowest energy point is: ' + \
+            str( data[ 0 , 0 ] ) )
+        logging.debug( 'Xs at lowest energy is: ' + \
+            str( data[ 0 , 1 ] ) )
+        cs_array[ 0 ] = ( ( data[ 1 , 1 ] - data[ 0 , 1 ] ) \
+            ( data[ 1 , 0 ] - data[ 0 , 0 ] ) ) * ( \
+            data[ 0 , 0 ] - energy ) - data[ 0 , 1 ]
+        logging.debug( 'Calculated XS is: ' + \
+            str( cs_array[ 0 ] ) )
+    else:
+        for row in range( len( data ) - 1 ):
+            index = row + 1
+            if energy <= data[ index , 0 ]:
+                logging.debug( 'Energy of photon is: '\
+                     + str( energy ) )
+                logging.debug( 'Energy of lower XS is: ' \
+                    + str( data[ index - 1 , 0 ] ) )
+                logging.debug( 'Energy of higher XS is: ' \
+                    + str( data[ index , 0 ] ) )
+                logging.debug( 'Lower XS is: ' + \
+                    str( data[ index -1 , 1 ] ) )
+                logging.debug( 'Higher XS is: ' +
+                    str( data[ index , 1 ] ) )
+                cs_array[ 0 ] = ( ( data[ index , 0 ] - \
+                    data[ index - 1 , 0 ] ) / ( \
+                    data[ index , 1 ] - data[ index - 1 , 1 ] \
+                    ) ) * ( data[ index , 0 ] - energy ) + \
+                    data[ index -1 , 1 ]
+                logging.debug( 'Calculated XS is: ' + \
+                   str( cs_array[ 0 ] ) )
+                break
+    cs_array[ 2 ] = cs_array[ 0 ] - cs_array[ 1 ]
+    cep()
+    logging.debug( 'The cs_array is: ' + str( cs_array ) )
+    logging.debug( 'Leaving the xs function' )
+    sep()
+    return( cs_array )
 #This function will handle colliding neutrons
 def collide( position , MU , col , absor , existance , angle \
                 , col_type , location , xs , width , new_angle , cep , sep ):
@@ -301,7 +389,7 @@ def distance( xs , cep , sep ):
     '''This function calculates distance to next collision'''
     sep()
     logging.debug( 'Entering the distance function' )
-    dis = -np.log( np.random.random( 1 ) ) / xs() 
+    dis = -np.log( np.random.random( 1 ) ) / xs 
     logging.debug( 'The calculated distance is ' + str( dis ) )
     logging.debug( 'Leaving the distance function' )
     sep()
@@ -475,10 +563,10 @@ def plotter( flux , num_part , num_bins , width , cep , sep ):
 
 #Lets begin our neutron histories loop
 for i in range( N ):
-     Lifetime( collisions , absorptions , leak_array , sig_array , \
+     Lifetime( collisions , absorptions , leak_array , xs , \
                     cell_length , start_pos , angle , \
                     distance , leakage , collide , col_type , \
-                    location , new_angle , cep , sep )
+                    location , new_angle , att_array , cep , sep )
 #Now we generate the flux
 Phi = flux_collision( collisions , absorptions , N , cell_length, \
                         h , sig_array, cep , sep )
