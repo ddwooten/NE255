@@ -158,6 +158,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
            , new_angle , eng , cep , sep )
            alive = res[ 0 ]
            mu = res[ 1 ]
+           eng = res[ 2 ]
         cep()
         logging.debug( 'Neutron parameters post collision: ' )
         logging.debug( 'Outgoing angle is: ' + str( mu ) )
@@ -165,7 +166,6 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         logging.debug( 'Neutron is alive: ' + str( alive ) )
         logging.debug( 'Neutron is inside: ' + str( inside ) )
 #Increment the collision number
-        logging.debug( 'Tripped, incrementing num_col')
         num_col += 1
         logging.debug( str( num_col ) )
     cep()
@@ -181,8 +181,12 @@ def score(  angle , place , energy , alb , old_place , cep , sep ):
     logging.debug( 'Entering the score function' )
 #Set default value
     mark = 0
-    if angle < 0 and place >= abs( old_place / angle ):
-       mark = energy * angle
+    cep()
+    logging.debug( 'Angle has value: ' + str( angle ) )
+    logging.debug( 'Place has value: ' + str( place ) )
+    logging.debug( 'P >              ' + str( old_place / angle ) )
+    if angle < 0.0 and place >= abs( old_place / angle ):
+       mark = energy * abs( angle )
     cep()
     logging.debug( 'mark has value: ' + str( mark ) )
     cep()
@@ -281,7 +285,7 @@ def collide( position , MU , col , absor , existance , angle \
     sep()
     logging.debug( 'Entering the colision routine' )
 #holder array
-    holder = [ True , 0.0 ]
+    holder = [ True , MU , energy ]
 #Determine the type of collision
     collision = col_type( cs , cep , sep )
     cep()
@@ -311,6 +315,7 @@ def collide( position , MU , col , absor , existance , angle \
         MU = out[ 0 ]
         holder[ 1 ] = MU
         energy = out[ 1 ] 
+        holder[ 2 ] = energy
         cep()
         logging.debug( 'Outgoing angle: ' + str( MU ) ) 
         logging.debug( 'Outgoing energy is: ' + str( energy ) )
