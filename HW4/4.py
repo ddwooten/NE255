@@ -107,7 +107,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
     mu = angle( cep , sep )
     cep()
     logging.debug( 'Neutron has angle: ' + str( mu ) )
-    eng = 2.0
+    eng = 0.05
     cep()
     logging.debug( 'Neutron has energy: ' + str( eng ) )
 #Counter for number of loops
@@ -151,10 +151,12 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         logging.debug( 'Parameters before collision: ' )
         logging.debug( 'Incoming angle is: ' + str( mu ) )
         logging.debug( 'Incoming energy is: ' + str( eng ) )
-        if alive and inside: alive = collide( pos , mu , col_counter, \
+        if alive and inside: res = collide( pos , mu , col_counter, \
            abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
            , new_angle , eng , cep , sep )
+           alive = res[ 0 ]
+           mu = res[ 1 ]
         cep()
         logging.debug( 'Neutron parameters post collision: ' )
         logging.debug( 'Outgoing angle is: ' + str( mu ) )
@@ -176,6 +178,8 @@ def score(  angle , place , energy , alb , old_place , cep , sep ):
     '''This function will score our albedo'''
     sep()
     logging.debug( 'Entering the score function' )
+#Set default value
+    mark = 0
     if angle < 0 and place >= abs( old_place / angle ):
        mark = energy * angle
     cep()
@@ -206,6 +210,8 @@ def xs( data , energy , cep , sep ):
     eng = eng * 10**( -13 )
 #Get the frequency
     v = eng / plank
+#This is a fudge factor to get the compton xs to be close to realistic
+    f = 10**(31)
 #Here we calculate the compton cross section
     radius = qo**4 / ( mass * light**2 )
     alpha = ( eng ) / ( mass * light**2 )
@@ -218,7 +224,7 @@ def xs( data , energy , cep , sep ):
     cep()
     logging.debug( 'The micro cs xs is: ' + mp.nstr( \
         cs_xs , n = 10 ) )
-    mu_cs = cs_xs * e_den
+    mu_cs = cs_xs * e_den * f
     logging.debug( 'The macro cs xs is: ' + mp.nstr( \
         mu_cs , n = 10 ) )
     cs_array[ 1 ] = float( mp.nstr( mu_cs , n = 10 ) )
@@ -273,6 +279,8 @@ def collide( position , MU , col , absor , existance , angle \
     '''This function collides neutrons and hanldes the aftermath'''
     sep()
     logging.debug( 'Entering the colision routine' )
+#holder array
+    holder = [ True , 0.0 ]
 #Determine the type of collision
     collision = col_type( cs , cep , sep )
     cep()
@@ -300,6 +308,7 @@ def collide( position , MU , col , absor , existance , angle \
         logging.debug( 'Incoming energy is: ' +str( energy ) )
         out = compton( MU , energy , cep , sep )
         MU = out[ 0 ]
+        holder[ 1 ] = MU
         energy = out[ 1 ] 
         cep()
         logging.debug( 'Outgoing angle: ' + str( MU ) ) 
@@ -314,12 +323,12 @@ def collide( position , MU , col , absor , existance , angle \
         absor[ spatial_bin ] += 1
         logging.debug( 'Count is now: ' + str( absor[ spatial_bin ] ) )
 #And "kill" the  nuetron
-        existance = False  
+        holder[ 0 ] = False  
         cep()
         logging.debug( 'Neutron is now alive: ' + str( existance ) )
     logging.debug( 'Leaving the collision function' )
     sep()
-    return( existance )
+    return( holder )
 
 #This function calculates an outgoing angle post scattering
 def new_angle( incoming , x_sec , energy , cep , sep ):
@@ -374,7 +383,7 @@ def compton( old_angle , energy , cep , sep ):
 #Generate and store outgoing angle
     out[ 0 ] = math.cos( math.acos( old_angle ) + \
         math.acos( 1.0 - lam * ( x1 - 1.0 ) ) )
-    logging.debug( 'Old angle: ' + str( angle ) )
+    logging.debug( 'Old angle: ' + str( old_angle ) )
     logging.debug( 'New angle: ' + str( out[ 0 ] ) )
     logging.debug( 'Leaving the compton function' )
     sep()
