@@ -112,6 +112,8 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
     logging.debug( 'Neutron has energy: ' + str( eng ) )
 #Counter for number of loops
     num_col = 0
+#Initilize the count variable
+    count = 0
 #Here we begin the tracking loop
 #While the neutron is both not absorbed and not leaked
     while ( inside and alive ):
@@ -132,7 +134,9 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         cep()
         logging.debug( 'New position is: ' + str( pos ) )
 #Check for scoring albedo
-        if num_col = 1:
+        logging.debug( 'num_col is: ' + str( num_col ) )
+        if num_col > 0 and num_col < 2:
+            logging.debug( 'Tripped' )
             count = score( mu , pos , eng , \
                  count, old_pos ,  cep , sep )
 #Check for leakage
@@ -158,7 +162,11 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         logging.debug( 'Neutron is alive: ' + str( alive ) )
         logging.debug( 'Neutron is inside: ' + str( inside ) )
 #Increment the collision number
+        logging.debug( 'Tripped, incrementing num_col')
         num_col += 1
+        logging.debug( str( num_col ) )
+    cep()
+    logging.debug( 'Albedo for this photon is: ' + str( count ) )
     logging.debug( 'Terminating neutron history' )
     sep()
     return( count )
@@ -170,6 +178,9 @@ def score(  angle , place , energy , alb , old_place , cep , sep ):
     logging.debug( 'Entering the score function' )
     if angle < 0 and place >= abs( old_place / angle ):
        mark = energy * angle
+    cep()
+    logging.debug( 'mark has value: ' + str( mark ) )
+    cep()
     logging.debug( 'Leaving the score function' )
     sep()
     return( mark )
@@ -184,19 +195,20 @@ def xs( data , energy , cep , sep ):
 #Here we define the concreate density
     rho = 2.3
 #Here we define a rough electron density
-    e_den = mpf( 3 * 10^( 23 ) * 100**3 )
+    e_den = mp.mpf( 3 * 10**( 23 ) * 100**3 )
 #Here we define the speed of light, planks const, and electron mass
-    plank = mpf( 6.626 * 10**( -34 ) )
-    qo = mpf( 1.602 * 10**( -19 ) )
-    light = mpf( 3.0 * 10**( 8 ) )
-    mass = mpf( 9.109 * 10**( -31 ) )
+    plank = mp.mpf( 6.626 * 10**( -34 ) )
+    qo = mp.mpf( 1.602 * 10**( -19 ) )
+    light = mp.mpf( 3.0 * 10**( 8 ) )
+    mass = mp.mpf( 9.109 * 10**( -31 ) )
 #Set the energy as an extended precision number
-    eng = mpmathify( energy )
+    eng = mp.mpmathify( energy )
+    eng = eng * 10**( -13 )
 #Get the frequency
     v = eng / plank
 #Here we calculate the compton cross section
     radius = qo**4 / ( mass * light**2 )
-    alpha = plank * v / ( mass * light**2 )
+    alpha = ( eng ) / ( mass * light**2 )
     cs_xs = 2 * mp.pi * radius * ( ( ( 1.0 + alpha ) \
         / ( alpha**2 ) ) * ( ( ( 2.0 * ( 1.0 + alpha ) \
         ) / ( 1.0 + 2.0 * alpha ) ) - ( 1.0 / alpha ) * \
@@ -245,6 +257,8 @@ def xs( data , energy , cep , sep ):
                 logging.debug( 'Calculated XS is: ' + \
                    str( cs_array[ 0 ] ) )
                 break
+#Multiply by rho
+    cs_array[ 0 ] = cs_array[ 0 ] * rho
     cs_array[ 2 ] = cs_array[ 0 ] - cs_array[ 1 ]
     cep()
     logging.debug( 'The cs_array is: ' + str( cs_array ) )
@@ -356,7 +370,7 @@ def compton( old_angle , energy , cep , sep ):
                out[ 1 ] = 0.511 / ( x1 * lam ) 
     cep()
     logging.debug( 'Old energy: ' + str( energy ) )
-    logging.debug( 'New energy: ' + str( out[ 1 ] )
+    logging.debug( 'New energy: ' + str( out[ 1 ] ) )
 #Generate and store outgoing angle
     out[ 0 ] = math.cos( math.acos( old_angle ) + \
         math.acos( 1.0 - lam * ( x1 - 1.0 ) ) )
@@ -385,7 +399,7 @@ def leakage( location , leak_array , present , cep , sep ):
     logging.debug( 'Location is: ' + str( location ) )
     logging.debug( 'Left leakage is: ' + str( leak_array[ 0 ] ) )
     logging.debug( 'Right leakage is: ' + str( leak_array[ 1 ] ) )
-    if location > 8.0: present = False ; leak_array[ 1 ] += 1
+    if location > 5.0: present = False ; leak_array[ 1 ] += 1
     if location < 0.0: present = False ; leak_array[ 0 ] += 1
     cep()
     logging.debug( 'Neutron is inside: ' + str( present ) )
@@ -631,11 +645,11 @@ for i in range( N ):
                     location , new_angle , att_array , cep , sep )
 
 #Now we generate the flux
-Phi = flux_collision( collisions , absorptions , N , cell_length, \
-                        h , sig_array, cep , sep )
+#Phi = flux_collision( collisions , absorptions , N , cell_length, \
+#                        h , sig_array, cep , sep )
 
 #Now we plot the flux
-plotter( Phi , N , h , cell_length , cep , sep )
+#plotter( Phi , N , h , cell_length , cep , sep )
 
 #Now we generate the absorption information
 abs_out = abs_half_cells( absorptions , N , cep , sep )
