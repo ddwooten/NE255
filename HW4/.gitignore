@@ -10,3 +10,6 @@
 *.png
 *.tiff
 *.tif
+*.*~*
+*.err
+*.webm

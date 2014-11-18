@@ -46,7 +46,7 @@ LogFileName = 'logfile.dat'
 OutputFile = 'output.dat'
 
 #Set the log level
-LogLevel = 0
+LogLevel = 20
 
 # This does some basic config on the log file
 logging.basicConfig( filename = LogFileName , format = \
@@ -495,17 +495,17 @@ leak_prob = currents( leak_array , N )
 #We also print to the log file
 
 sep()
-logging.debug( 'The number of particles used is: ' + str( N ) )
+logging.critical( 'The number of particles used is: ' + str( N ) )
 cep()
-logging.debug( 'The abs rate is: ' + str( abs_out[ 0 ] ) )
-logging.debug( 'The abs rate error is: ' + str( abs_out[ 1 ] ) )
-logging.debug( 'The abs prob is: ' + str( abs_out[ 2 ] ) )
-logging.debug( 'The abs prob error is: ' + str( abs_out[ 3 ] ) )
+logging.critical( 'The abs rate is: ' + str( abs_out[ 0 ] ) )
+logging.critical( 'The abs rate error is: ' + str( abs_out[ 1 ] ) )
+logging.critical( 'The abs prob is: ' + str( abs_out[ 2 ] ) )
+logging.critical( 'The abs prob error is: ' + str( abs_out[ 3 ] ) )
 cep()
-logging.debug( 'The leakage rate is: ' + str( leak_array ) )
-logging.debug( 'The error in leak rate is: ' + str( leak_prob[ 0 ] ) )
-logging.debug( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
-logging.debug( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
+logging.critical( 'The leakage rate is: ' + str( leak_array ) )
+logging.critical( 'The error in leak rate is: ' + str( leak_prob[ 0 ] ) )
+logging.critical( 'The leak prob is: ' + str( leak_prob[ 1 ] ) )
+logging.critical( 'The leak prob error is: ' + str( leak_prob[ 2 ] ) )
 
 # Let the user know it has all ended
 print "Sn CODE END!!"
