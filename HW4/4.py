@@ -107,7 +107,7 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
     mu = angle( cep , sep )
     cep()
     logging.debug( 'Neutron has angle: ' + str( mu ) )
-    eng = 0.05
+    eng = 2.0 
     cep()
     logging.debug( 'Neutron has energy: ' + str( eng ) )
 #Counter for number of loops
@@ -151,7 +151,8 @@ def Lifetime( col_counter , abs_counter , leak_counter , xs , \
         logging.debug( 'Parameters before collision: ' )
         logging.debug( 'Incoming angle is: ' + str( mu ) )
         logging.debug( 'Incoming energy is: ' + str( eng ) )
-        if alive and inside: res = collide( pos , mu , col_counter, \
+        if alive and inside: 
+           res = collide( pos , mu , col_counter, \
            abs_counter , \
            alive, angle , col_type , location , xs_array , cell_width\
            , new_angle , eng , cep , sep )
